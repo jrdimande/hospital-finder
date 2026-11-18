@@ -38,6 +38,9 @@ const detailFields = computed(() => Object.entries(props.hospital.properties)
     </div>
     <h3>{{ hospital.name }}</h3>
     <p v-if="hospital.type" class="hospital-type">{{ hospital.type }}</p>
+    <p v-if="hospital.source === 'OpenStreetMap'" class="hospital-source">
+      Localização do <a :href="hospital.sourceUrl" target="_blank" rel="noreferrer">OpenStreetMap ↗</a>
+    </p>
     <div class="hospital-fields">
       <span v-for="[label, value] in fields" :key="label"><strong>{{ label }}:</strong> {{ value }}</span>
     </div>

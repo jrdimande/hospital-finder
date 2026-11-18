@@ -11,9 +11,9 @@ const emit = defineEmits(['update:modelValue', 'update:provinceValue', 'search']
 <template>
   <form class="search-bar" role="search" @submit.prevent="emit('search')">
     <label class="search-input-wrap">
-      <span class="sr-only">Pesquisar por hospital, tipo ou localização</span>
+      <span class="sr-only">Pesquisar por nome de unidade, endereço ou localidade</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.3 4.3"/></svg>
-      <input :value="modelValue" type="search" placeholder="Pesquisar hospital ou localização…" @input="emit('update:modelValue', $event.target.value)" />
+      <input :value="modelValue" type="search" placeholder="Nome da unidade, endereço ou localidade…" @input="emit('update:modelValue', $event.target.value)" />
     </label>
     <label class="province-select">
       <span class="sr-only">Filtrar por província</span>

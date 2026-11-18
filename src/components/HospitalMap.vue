@@ -63,6 +63,7 @@ function renderHospitals() {
 }
 
 function markerColor(category) {
+  if (category === 'MapSearch') return '#2585c2'
   if (category === 'Hospital') return '#df514d'
   if (category === 'Centro de Saúde') return '#279b76'
   return '#e29a34'
@@ -71,6 +72,7 @@ function markerColor(category) {
 function popupContent(hospital) {
   const details = [
     ['Tipo', hospital.type],
+    ['Fonte', hospital.source],
     ['Província', hospital.properties.Provincia],
     ['Distrito', hospital.properties.Distrito],
     ['Localidade', hospital.properties.PostoAdministrativo || hospital.properties.AreaLocalizacao],
@@ -192,7 +194,11 @@ watch(() => props.selectedId, (selectedId) => {
   updateSelectedMarker()
   const marker = markerById.get(selectedId)
   if (marker && map) {
-    map.panTo(marker.getLatLng())
+    if (String(selectedId).startsWith('map-')) {
+      map.setView(marker.getLatLng(), Math.max(map.getZoom(), 14))
+    } else {
+      map.panTo(marker.getLatLng())
+    }
     marker.openPopup()
   }
 })

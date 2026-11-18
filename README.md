@@ -1,6 +1,6 @@
 # Saúde MZ
 
-Aplicação Vue 3 para localizar hospitais, centros de saúde e postos de saúde em Moçambique. Usa os dados geográficos públicos do MozGIS, Leaflet/OpenStreetMap, geolocalização do navegador e rotas rodoviárias OSRM.
+Aplicação Vue 3 para localizar hospitais, centros de saúde e postos de saúde em Moçambique. Usa os dados geográficos públicos do MozGIS, Leaflet/OpenStreetMap, geolocalização do navegador, pesquisa de locais no OpenStreetMap/Nominatim e rotas rodoviárias OSRM. Quando a pesquisa MozGIS não encontra resultados, uma pesquisa enviada pelo utilizador procura o nome do local no mapa e usa as coordenadas encontradas para permitir uma rota.
 
 ## Executar localmente
 

@@ -8,6 +8,7 @@ import Navbar from '../components/Navbar.vue'
 import SearchBar from '../components/SearchBar.vue'
 import { useGeolocation } from '../composables/useGeolocation'
 import { useHospitals } from '../composables/useHospitals'
+import { searchMapPlaces } from '../services/placeSearchService'
 import { fetchDrivingRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
 
@@ -23,6 +24,11 @@ const pendingRouteHospital = ref(null)
 const pendingRouteScroll = ref(false)
 const autoRoutePending = ref(false)
 const automaticRouteQueue = ref([])
+const mapPlaces = ref([])
+const placeSearchLoading = ref(false)
+const placeSearchError = ref('')
+const placeSearchMessage = ref('')
+let placeSearchRequestId = 0
 const route = ref(null)
 const routeError = ref('')
 const routeLoadingId = ref(null)
@@ -44,8 +50,10 @@ const searchedHospitals = computed(() => {
   })
 })
 
-const rankedHospitals = computed(() => searchedHospitals.value
-  .map((hospital) => ({
+const rankedHospitals = computed(() => [
+  ...searchedHospitals.value,
+  ...mapPlaces.value,
+].map((hospital) => ({
     hospital,
     distanceKm: location.value ? haversineDistanceKm(location.value, hospital) : null,
   }))
@@ -60,8 +68,51 @@ const matchingHospitals = computed(() => {
   return rankedHospitals.value.filter((item) => item.distanceKm !== null && item.distanceKm <= radius)
 })
 const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
+const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || selectedProvince.value || nearbyActive.value))
 
 watch([searchQuery, selectedProvince, distanceFilter, nearbyActive], () => { showAllResults.value = false })
+watch([searchQuery, selectedProvince], () => {
+  placeSearchRequestId += 1
+  mapPlaces.value = []
+  placeSearchError.value = ''
+  placeSearchMessage.value = ''
+  placeSearchLoading.value = false
+  if (String(selectedId.value).startsWith('map-')) selectedId.value = null
+  clearRoute()
+})
+
+async function searchPlaces() {
+  clearRoute()
+  selectedId.value = null
+  nearbyActive.value = false
+  mapPlaces.value = []
+  placeSearchError.value = ''
+  placeSearchMessage.value = ''
+  if (!searchQuery.value.trim() || searchedHospitals.value.length) return
+
+  const requestId = ++placeSearchRequestId
+  placeSearchLoading.value = true
+  try {
+    const places = await searchMapPlaces(searchQuery.value, selectedProvince.value)
+    if (requestId !== placeSearchRequestId) return
+    mapPlaces.value = places
+    if (!mapPlaces.value.length) {
+      placeSearchMessage.value = `Não encontrámos “${searchQuery.value.trim()}” nos dados MozGIS nem no mapa. Tente outro nome ou inclua a cidade.`
+    } else {
+      selectedId.value = mapPlaces.value[0].id
+      requestAnimationFrame(() => {
+        document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  } catch (cause) {
+    if (requestId !== placeSearchRequestId) return
+    placeSearchError.value = cause instanceof Error
+      ? cause.message
+      : 'Não foi possível pesquisar este local no mapa.'
+  } finally {
+    if (requestId === placeSearchRequestId) placeSearchLoading.value = false
+  }
+}
 
 function findNearby() {
   const stoppingTracking = tracking.value
@@ -138,13 +189,17 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
 
 function clearRoute() {
   routeRequestId += 1
+  pendingRouteHospital.value = null
+  pendingRouteScroll.value = false
+  autoRoutePending.value = false
+  automaticRouteQueue.value = []
   route.value = null
   routeError.value = ''
   routeLoadingId.value = null
 }
 
 function retryRoute() {
-  const hospital = hospitals.value.find((item) => item.id === selectedId.value)
+  const hospital = [...hospitals.value, ...mapPlaces.value].find((item) => item.id === selectedId.value)
   if (hospital) showRoute(hospital)
 }
 
@@ -170,7 +225,7 @@ watch(location, (currentLocation) => {
 
   clearTimeout(rerouteTimer)
   rerouteTimer = setTimeout(() => {
-    const destination = hospitals.value.find((hospital) => hospital.id === route.value?.hospitalId)
+    const destination = [...hospitals.value, ...mapPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
     if (destination) showRoute(destination, { scroll: false })
   }, 1200)
 })
@@ -189,8 +244,20 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           v-model="searchQuery"
           v-model:province-value="selectedProvince"
           :provinces="provinces"
-          @search="selectedId = null"
+          @search="searchPlaces"
         />
+        <p class="search-hint">Se a unidade não estiver nos dados MozGIS, pesquisamos o local no OpenStreetMap.</p>
+
+        <div v-if="placeSearchLoading" class="place-search-status" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          A procurar o local no mapa…
+        </div>
+        <div v-else-if="placeSearchError" class="notice notice-error" role="alert">
+          <span aria-hidden="true">!</span><p>{{ placeSearchError }}</p>
+        </div>
+        <div v-else-if="placeSearchMessage" class="place-search-status" role="status">
+          {{ placeSearchMessage }}
+        </div>
 
         <div class="finder-steps" aria-label="Como encontrar uma unidade e iniciar uma rota">
           <span><i>1</i> Explore o mapa</span><b aria-hidden="true">→</b>
@@ -214,7 +281,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>1. Explore o mapa</strong></div>
               <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
-              <span v-else-if="hospitals.length" class="map-total">{{ nearbyActive && location ? matchingHospitals.length : hospitals.length }} unidades <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
+              <span v-else-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }} <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
             </div>
             <HospitalMap
               :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"
@@ -232,6 +299,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
               <span><i class="legend-dot hospital-dot"></i> Hospital</span>
               <span><i class="legend-dot center-dot"></i> Centro de saúde</span>
               <span><i class="legend-dot post-dot"></i> Posto de saúde</span>
+              <span v-if="mapPlaces.length"><i class="legend-dot search-result-dot"></i> Local pesquisado</span>
               <span><i class="legend-dot user-dot"></i> Posição GPS</span>
               <small>Posição atualizada enquanto o acompanhamento estiver ativo; rota rodoviária estimada pelo OSRM.</small>
             </div>
@@ -244,6 +312,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             :has-user-location="Boolean(location)"
             :locating="locating"
             :location-error="locationError"
+            :has-external-results="mapPlaces.length > 0"
             :route-loading-id="routeLoadingId"
             :nearby-active="nearbyActive"
             v-model:distance-filter="distanceFilter"

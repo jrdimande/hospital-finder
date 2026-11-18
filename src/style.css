@@ -99,6 +99,9 @@ button { cursor: pointer; }
 .data-source { display: flex; align-items: center; gap: 8px; color: #678294; font-size: 10px; padding-bottom: 5px; }
 .source-check { color: var(--green); background: #e5f4ed; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; }
 .search-bar { display: flex; min-height: 58px; border: 1px solid #e4ebef; border-radius: 9px; background: white; align-items: center; padding: 7px; box-shadow: 0 9px 25px #25465e08; }
+.search-hint { margin: 7px 3px 0; color: #718594; font-size: 11px; }
+.place-search-status { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 12px 14px; border: 1px solid #dce9ed; border-radius: 8px; background: #fff; color: #526f80; font-size: 12px; line-height: 1.5; }
+.place-search-status .loading-spinner { width: 18px; height: 18px; flex: none; }
 .search-input-wrap, .province-select { display: flex; align-items: center; position: relative; height: 42px; }
 .search-input-wrap { flex: 1; padding-inline: 14px; }
 .search-input-wrap svg, .province-select svg { flex: none; width: 16px; height: 16px; fill: none; stroke: #91a1ad; stroke-width: 1.7; }
@@ -154,6 +157,7 @@ button { cursor: pointer; }
 .center-dot { background: #279b76; }
 .post-dot { background: #e29a34; }
 .user-dot { background: #2585c2; }
+.search-result-dot { background: #2585c2; }
 .map-icon-container { background: transparent; border: 0; }
 .map-marker { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 2px solid white; color: white; box-shadow: 0 2px 7px #18394a55; font-size: 17px; font-weight: 500; }
 .hospital-marker { background: #e65d59; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); }
@@ -179,6 +183,8 @@ button { cursor: pointer; }
 .distance-pill { border-radius: 30px; padding: 5px 9px; background: #eaf6f0; color: #2d8e6d; font-size: 9px; font-weight: 700; }
 .hospital-card h3 { margin: 9px 0 2px; color: #2b4659; font-size: 12px; font-weight: 700; }
 .hospital-type { color: var(--blue); margin: 0 0 8px; font-size: 9px; }
+.hospital-source { margin: -3px 0 8px; color: #7c8f9b; font-size: 10px; }
+.hospital-source a { color: var(--blue); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .hospital-fields { display: grid; gap: 4px; color: #758997; font-size: 9px; }
 .hospital-fields strong { color: #647d8d; font-weight: 600; }
 .hospital-details { margin-top: 8px; color: #6b8190; font-size: 9px; }

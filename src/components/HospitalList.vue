@@ -9,6 +9,7 @@ defineProps({
   hasUserLocation: { type: Boolean, default: false },
   locating: { type: Boolean, default: false },
   locationError: { type: String, default: '' },
+  hasExternalResults: { type: Boolean, default: false },
   routeLoadingId: { type: [String, Number], default: null },
   nearbyActive: { type: Boolean, default: false },
   distanceFilter: { type: String, default: 'all' },
@@ -22,8 +23,9 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
     <div class="results-heading">
       <div>
         <div class="section-kicker"><span></span> 2. ESCOLHA UMA UNIDADE</div>
-        <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de si' : 'Unidades sanitárias' }}</h2>
+        <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de si' : hasExternalResults ? 'Locais encontrados no mapa' : 'Unidades sanitárias' }}</h2>
         <p v-if="nearbyActive">Ordenados pela distância em linha reta</p>
+        <p v-else-if="hasExternalResults">Resultados do OpenStreetMap; consulte a origem em cada cartão.</p>
         <p v-else>Unidades disponíveis nos dados do MozGIS</p>
       </div>
       <label v-if="nearbyActive" class="radius-filter">
@@ -35,7 +37,7 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
           <option value="all">Todos</option>
         </select>
       </label>
-      <span v-if="totalCount" class="result-count">{{ totalCount }} {{ totalCount === 1 ? 'unidade' : 'unidades' }}</span>
+      <span v-if="totalCount" class="result-count">{{ totalCount }} {{ hasExternalResults && !nearbyActive ? totalCount === 1 ? 'local' : 'locais' : totalCount === 1 ? 'unidade' : 'unidades' }}</span>
     </div>
     <button
       v-if="showingAll || totalCount > hospitals.length"
