@@ -20,6 +20,6 @@ npm run preview
 
 O build consulta as três camadas MozGIS e grava um GeoJSON estático em `public/data/unidades.geojson`. A aplicação publicada lê esse ficheiro do mesmo site, sem depender de CORS do MozGIS no navegador e sem API key. O ficheiro é gerado durante o build e não é versionado.
 
-O workflow `.github/workflows/deploy-pages.yml` publica automaticamente no GitHub Pages após cada push para `main` ou `master`, e atualiza os dados a cada seis horas. Também pode ser executado manualmente no separador **Actions**. Para a primeira publicação, confirme em **Settings → Pages** que a origem está definida como **GitHub Actions**.
+O workflow `.github/workflows/deploy.yml` valida e publica automaticamente no GitHub Pages após cada push para `main`. Também pode ser executado manualmente no separador **Actions**. Para a primeira publicação, confirme em **Settings → Pages** que a origem está definida como **GitHub Actions**.
 
 O endereço esperado para este repositório é <https://jrdimande.github.io/hospital-finder/>. Os dados são atualizados a cada execução do workflow; a disponibilidade do site não depende de o navegador conseguir contactar diretamente o MozGIS.
