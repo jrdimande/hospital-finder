@@ -63,12 +63,15 @@ const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAll
 watch([searchQuery, selectedProvince, distanceFilter, nearbyActive], () => { showAllResults.value = false })
 
 function findNearby() {
+  const stoppingTracking = tracking.value
   nearbyActive.value = true
   showAllResults.value = false
-  autoRoutePending.value = !tracking.value
-  requestAnimationFrame(() => {
-    document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  })
+  autoRoutePending.value = !stoppingTracking
+  if (!stoppingTracking) {
+    requestAnimationFrame(() => {
+      document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
   locate()
 }
 
