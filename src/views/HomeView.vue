@@ -21,6 +21,7 @@ const selectedId = ref(null)
 const showAllResults = ref(false)
 const pendingRouteHospital = ref(null)
 const autoRoutePending = ref(false)
+const automaticRouteQueue = ref([])
 const route = ref(null)
 const routeError = ref('')
 const routeLoadingId = ref(null)
@@ -82,8 +83,9 @@ function selectHospital(hospital, { scroll = true } = {}) {
   if (scroll) document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
-async function showRoute(hospital, { scroll = true } = {}) {
+async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
   autoRoutePending.value = false
+  if (!automatic) automaticRouteQueue.value = []
   selectHospital(hospital, { scroll })
   if (!location.value) {
     pendingRouteHospital.value = hospital
@@ -105,9 +107,21 @@ async function showRoute(hospital, { scroll = true } = {}) {
       destinationName: hospital.name,
       origin,
     }
+    if (automatic) automaticRouteQueue.value = []
   } catch (error) {
     if (requestId === routeRequestId) {
-      routeError.value = error instanceof Error ? error.message : 'Ocorreu um erro ao calcular a rota.'
+      const message = error instanceof Error ? error.message : 'Ocorreu um erro ao calcular a rota.'
+      const nextHospital = automatic && message.includes('Não foi possível encontrar uma rota rodoviária')
+        ? automaticRouteQueue.value.shift()
+        : null
+      if (nextHospital) {
+        showRoute(nextHospital, { scroll: false, automatic: true })
+      } else {
+        automaticRouteQueue.value = []
+        routeError.value = automatic && message.includes('Não foi possível encontrar uma rota rodoviária')
+          ? 'Não foi encontrada uma rota para as unidades disponíveis próximas de si. Escolha outra unidade na lista para tentar novamente.'
+          : message
+      }
     }
   } finally {
     if (requestId === routeRequestId) routeLoadingId.value = null
@@ -135,8 +149,10 @@ watch(location, (currentLocation) => {
   }
   if (autoRoutePending.value && currentLocation) {
     autoRoutePending.value = false
-    const nearestHospital = matchingHospitals.value[0]?.hospital
-    if (nearestHospital) showRoute(nearestHospital, { scroll: false })
+    const nearestHospitals = matchingHospitals.value.map((item) => item.hospital)
+    const nearestHospital = nearestHospitals.shift()
+    automaticRouteQueue.value = nearestHospitals
+    if (nearestHospital) showRoute(nearestHospital, { scroll: false, automatic: true })
     return
   }
   if (!tracking.value || !route.value || !currentLocation) return
