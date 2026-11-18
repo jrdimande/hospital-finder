@@ -205,6 +205,46 @@ button { cursor: pointer; }
 .empty-state p { margin: 5px 0 0; font-size: 9px; line-height: 1.6; }
 .empty-retry { min-height: 38px; margin-top: 13px; padding: 0 13px; font-size: 10px; }
 
+/* Readability and feedback for the main search flow */
+.hero-stats strong { font-size: 12px; }
+.hero-stats small, .hero-note { font-size: 10px; }
+.search-input-wrap input { font-size: 14px; }
+.province-select select, .search-button { font-size: 12px; }
+.finder-steps { font-size: 12px; }
+.finder-steps i { width: 25px; height: 25px; font-size: 11px; }
+.map-panel-header strong { font-size: 13px; }
+.map-total { font-size: 11px; }
+.route-summary-text strong { font-size: 12px; }
+.route-summary-text small, .route-clear { font-size: 11px; }
+.map-feedback { font-size: 12px; }
+.map-recenter { min-height: 42px; font-size: 12px; }
+.map-legend { font-size: 11px; }
+.map-legend small { font-size: 10px; }
+.results-heading .section-kicker { font-size: 9px; }
+.results-heading h2 { font-size: 19px; }
+.results-heading p, .result-count, .radius-filter { font-size: 11px; }
+.radius-filter select { font-size: 11px; }
+.hospital-card { transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease; }
+.hospital-card:hover { transform: translateY(-2px); border-color: #90bfca; box-shadow: 0 8px 20px #17364b12; }
+.hospital-card.is-selected { border-color: #4e9bad; background: #f1fafb; box-shadow: inset 3px 0 #2587a1, 0 5px 16px #176f9f12; }
+.hospital-card h3 { font-size: 15px; }
+.hospital-type { font-size: 12px; }
+.hospital-fields { font-size: 11px; line-height: 1.5; }
+.distance-pill { font-size: 10px; }
+.hospital-details { font-size: 11px; }
+.hospital-details summary { min-height: 34px; display: flex; align-items: center; }
+.card-actions .button { min-height: 42px; font-size: 11px; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.button:hover:not(:disabled), .show-all-button:hover, .route-clear:hover, .map-recenter:hover { transform: translateY(-1px); }
+.button:active:not(:disabled), .show-all-button:active, .route-clear:active, .map-recenter:active { transform: translateY(0) scale(.98); }
+.empty-state strong { font-size: 13px; }
+.empty-state p { font-size: 11px; }
+.empty-retry { min-height: 42px; font-size: 11px; }
+.leaflet-interactive { cursor: pointer; }
+.route-clear, .map-recenter, .hospital-details summary { transition: background .18s ease, border-color .18s ease, color .18s ease; }
+.route-clear:hover, .map-recenter:hover { border-color: #b8d1da; background: #f3f9fa; }
+.show-all-button { min-height: 44px; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.empty-state .button:focus-visible, .hospital-details summary:focus-visible { outline: 3px solid #62b6d0; outline-offset: 2px; border-radius: 4px; }
+
 .about-section { padding: 82px 0; background: white; }
 .about-grid { display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 82px; }
 .about-visual { position: relative; height: 325px; overflow: hidden; border-radius: 12px; background: linear-gradient(135deg,#e9f5f1,#eef5f7); }
@@ -285,14 +325,14 @@ button { cursor: pointer; }
   .province-select { width: calc(100% - 112px); border-left: 0; padding-left: 10px; }
   .search-button { flex: 1; padding-inline: 10px; }
   .map-layout { gap: 13px; margin-top: 17px; }
-  .finder-steps { justify-content: space-between; gap: 5px; font-size: 8px; }
+  .finder-steps { justify-content: space-between; gap: 5px; font-size: 10px; }
   .finder-steps span { gap: 4px; }
-  .finder-steps i { width: 19px; height: 19px; }
+  .finder-steps i { width: 22px; height: 22px; }
   .finder-steps b { font-size: 11px; }
   .leaflet-map { height: min(68svh, 560px); min-height: 300px; }
   .route-summary { padding: 9px 10px; gap: 8px; }
   .route-summary-text strong { max-width: 48vw; }
-  .map-feedback { width: calc(100% - 20px); justify-content: center; font-size: 9px; }
+  .map-feedback { width: calc(100% - 20px); justify-content: center; font-size: 10px; }
   .map-recenter { top: 9px; right: 9px; padding: 8px; }
   .map-recenter span { display: none; }
   .map-legend { gap: 11px; }
@@ -301,7 +341,7 @@ button { cursor: pointer; }
   .results-section { padding: 14px 11px; }
   .show-all-button { min-height: 44px; }
   .results-heading { flex-wrap: wrap; }
-  .results-heading h2 { font-size: 16px; }
+  .results-heading h2 { font-size: 18px; }
   .radius-filter { margin-left: auto; }
   .about-section { padding: 51px 0; }
   .about-grid { grid-template-columns: 1fr; gap: 27px; }
