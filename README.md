@@ -22,17 +22,17 @@ O build consulta as três camadas MozGIS e grava um GeoJSON estático em `public
 
 ## Publicar no GitHub Pages
 
-O workflow `.github/workflows/deploy.yml` instala dependências, gera os dados e publica automaticamente após cada push para `main`. Para ativar a primeira publicação:
+O workflow `.github/workflows/deploy.yml` instala dependências, gera os dados e publica automaticamente após cada push para `master`. Para ativar a primeira publicação:
 
-1. Envie o branch `main` para o GitHub:
+1. Envie o branch `master` para o GitHub:
 
    ```sh
-   git push origin main
+   git push origin master
    ```
 
 2. No repositório GitHub, abra **Settings → Pages** e escolha **GitHub Actions** em **Build and deployment → Source**.
 3. Abra **Actions** e acompanhe a execução **CI/CD — GitHub Pages**. Quando os trabalhos `build` e `deploy` terminarem com sucesso, o site estará publicado.
 
-Para publicar sem um novo push, abra o mesmo workflow em **Actions → CI/CD — GitHub Pages → Run workflow** e execute-o no branch `main`.
+Para publicar sem um novo push, abra o mesmo workflow em **Actions → CI/CD — GitHub Pages → Run workflow** e execute-o no branch `master`.
 
 O endereço esperado para este repositório é <https://jrdimande.github.io/hospital-finder/>. Os dados são atualizados a cada execução do workflow; a disponibilidade do site não depende de o navegador conseguir contactar diretamente o MozGIS.
