@@ -11,7 +11,6 @@ defineEmits(['locate'])
 <template>
   <section id="inicio" class="hero page-shell">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="eyebrow-dot"></span> Cuidado mais perto de si</div>
       <h1>Encontre uma unidade sanitária <span>perto de si.</span></h1>
       <p>Descubra hospitais, centros e postos de saúde em Moçambique, veja a sua posição atual e encontre o melhor caminho.</p>
       <button class="button button-primary hero-button" :class="{ 'button-tracking': tracking }" :disabled="loading" :aria-busy="locating" @click="$emit('locate')">

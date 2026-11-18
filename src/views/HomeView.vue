@@ -20,6 +20,7 @@ const nearbyActive = ref(false)
 const selectedId = ref(null)
 const showAllResults = ref(false)
 const pendingRouteHospital = ref(null)
+const autoRoutePending = ref(false)
 const route = ref(null)
 const routeError = ref('')
 const routeLoadingId = ref(null)
@@ -63,6 +64,7 @@ watch([searchQuery, selectedProvince, distanceFilter, nearbyActive], () => { sho
 function findNearby() {
   nearbyActive.value = true
   showAllResults.value = false
+  autoRoutePending.value = !tracking.value
   requestAnimationFrame(() => {
     document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
@@ -81,6 +83,7 @@ function selectHospital(hospital, { scroll = true } = {}) {
 }
 
 async function showRoute(hospital, { scroll = true } = {}) {
+  autoRoutePending.value = false
   selectHospital(hospital, { scroll })
   if (!location.value) {
     pendingRouteHospital.value = hospital
@@ -130,6 +133,12 @@ watch(location, (currentLocation) => {
     showRoute(destination, { scroll: false })
     return
   }
+  if (autoRoutePending.value && currentLocation) {
+    autoRoutePending.value = false
+    const nearestHospital = matchingHospitals.value[0]?.hospital
+    if (nearestHospital) showRoute(nearestHospital, { scroll: false })
+    return
+  }
   if (!tracking.value || !route.value || !currentLocation) return
   if (haversineDistanceKm(currentLocation, route.value.origin) < 0.1) return
 
@@ -150,15 +159,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
 
     <section id="encontrar" class="finder-section">
       <div class="page-shell">
-        <div class="finder-intro">
-          <div>
-            <div class="section-kicker"><span></span> PESQUISE E DESCUBRA</div>
-            <h2>Cuidados de saúde, <span>ao seu alcance.</span></h2>
-            <p>Pesquise por nome ou localidade, ou veja as opções mais próximas de si.</p>
-          </div>
-          <div class="data-source"><span class="source-check">✓</span> Hospitais, centros e postos do MozGIS</div>
-        </div>
-
         <SearchBar
           v-model="searchQuery"
           v-model:province-value="selectedProvince"
