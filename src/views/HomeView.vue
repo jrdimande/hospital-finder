@@ -20,6 +20,7 @@ const nearbyActive = ref(false)
 const selectedId = ref(null)
 const showAllResults = ref(false)
 const pendingRouteHospital = ref(null)
+const pendingRouteScroll = ref(false)
 const autoRoutePending = ref(false)
 const automaticRouteQueue = ref([])
 const route = ref(null)
@@ -83,7 +84,7 @@ function selectHospital(hospital, { scroll = true } = {}) {
     routeError.value = ''
     routeLoadingId.value = null
   }
-  if (scroll) document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  if (scroll) document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
@@ -92,6 +93,7 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
   selectHospital(hospital, { scroll })
   if (!location.value) {
     pendingRouteHospital.value = hospital
+    pendingRouteScroll.value = scroll
     nearbyActive.value = false
     locate()
     return
@@ -127,7 +129,10 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
       }
     }
   } finally {
-    if (requestId === routeRequestId) routeLoadingId.value = null
+    if (requestId === routeRequestId) {
+      routeLoadingId.value = null
+      if (scroll) document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 }
 
@@ -146,8 +151,10 @@ function retryRoute() {
 watch(location, (currentLocation) => {
   if (pendingRouteHospital.value && currentLocation) {
     const destination = pendingRouteHospital.value
+    const shouldScrollToRoute = pendingRouteScroll.value
     pendingRouteHospital.value = null
-    showRoute(destination, { scroll: false })
+    pendingRouteScroll.value = false
+    showRoute(destination, { scroll: shouldScrollToRoute })
     return
   }
   if (autoRoutePending.value && currentLocation) {
@@ -202,8 +209,8 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         </div>
         <LoadingState v-if="loading" />
 
-        <div id="mapa" class="map-layout">
-          <div class="map-panel">
+        <div class="map-layout">
+          <div id="mapa" class="map-panel">
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>1. Explore o mapa</strong></div>
               <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
