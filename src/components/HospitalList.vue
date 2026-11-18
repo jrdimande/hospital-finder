@@ -21,8 +21,8 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
   <section class="results-section" aria-labelledby="results-title">
     <div class="results-heading">
       <div>
-        <div class="section-kicker"><span></span> RESULTADOS</div>
-        <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de ti' : 'Unidades sanitárias' }}</h2>
+        <div class="section-kicker"><span></span> 2. ESCOLHA UMA UNIDADE</div>
+        <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de si' : 'Unidades sanitárias' }}</h2>
         <p v-if="nearbyActive">Ordenados pela distância em linha reta</p>
         <p v-else>Unidades disponíveis nos dados do MozGIS</p>
       </div>
@@ -52,6 +52,7 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
         :distance-km="item.distanceKm"
         :selected="selectedId === item.hospital.id"
         :has-user-location="hasUserLocation"
+        :locating="locating"
         :route-loading="routeLoadingId === item.hospital.id"
         @select="emit('select', $event)"
         @directions="emit('directions', $event)"

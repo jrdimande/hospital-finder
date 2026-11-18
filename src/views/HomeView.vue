@@ -19,6 +19,7 @@ const distanceFilter = ref('all')
 const nearbyActive = ref(false)
 const selectedId = ref(null)
 const showAllResults = ref(false)
+const pendingRouteHospital = ref(null)
 const route = ref(null)
 const routeError = ref('')
 const routeLoadingId = ref(null)
@@ -80,8 +81,14 @@ function selectHospital(hospital, { scroll = true } = {}) {
 }
 
 async function showRoute(hospital, { scroll = true } = {}) {
-  if (!location.value) return
   selectHospital(hospital, { scroll })
+  if (!location.value) {
+    pendingRouteHospital.value = hospital
+    nearbyActive.value = false
+    locate()
+    return
+  }
+  pendingRouteHospital.value = null
   const requestId = ++routeRequestId
   route.value = null
   routeError.value = ''
@@ -117,6 +124,12 @@ function retryRoute() {
 }
 
 watch(location, (currentLocation) => {
+  if (pendingRouteHospital.value && currentLocation) {
+    const destination = pendingRouteHospital.value
+    pendingRouteHospital.value = null
+    showRoute(destination, { scroll: false })
+    return
+  }
   if (!tracking.value || !route.value || !currentLocation) return
   if (haversineDistanceKm(currentLocation, route.value.origin) < 0.1) return
 
@@ -153,6 +166,12 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           @search="selectedId = null"
         />
 
+        <div class="finder-steps" aria-label="Como encontrar uma unidade e iniciar uma rota">
+          <span><i>1</i> Explore o mapa</span><b aria-hidden="true">→</b>
+          <span><i>2</i> Escolha uma unidade</span><b aria-hidden="true">→</b>
+          <span><i>3</i> Veja como chegar</span>
+        </div>
+
         <div v-if="locationError" class="notice notice-error" role="alert">
           <span aria-hidden="true">!</span><p>{{ locationError }}</p>
         </div>
@@ -167,7 +186,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div id="mapa" class="map-layout">
           <div class="map-panel">
             <div class="map-panel-header">
-              <div><span class="map-live-dot"></span><strong>{{ nearbyActive ? locating ? 'A procurar unidades perto de si…' : location ? 'Unidades perto de si' : 'Unidades sanitárias' : 'Hospitais, centros e postos de saúde' }}</strong></div>
+              <div><span class="map-live-dot"></span><strong>1. Explore o mapa</strong></div>
               <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
               <span v-else-if="hospitals.length" class="map-total">{{ nearbyActive && location ? matchingHospitals.length : hospitals.length }} unidades <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
             </div>
@@ -202,7 +221,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             :route-loading-id="routeLoadingId"
             :nearby-active="nearbyActive"
             v-model:distance-filter="distanceFilter"
-            @select="selectHospital"
+            @select="selectHospital($event, { scroll: false })"
             @directions="showRoute"
             @toggle-all="showAllResults = !showAllResults"
             @retry-location="findNearby"

@@ -7,6 +7,7 @@ const props = defineProps({
   distanceKm: { type: Number, default: null },
   selected: { type: Boolean, default: false },
   hasUserLocation: { type: Boolean, default: false },
+  locating: { type: Boolean, default: false },
   routeLoading: { type: Boolean, default: false },
 })
 
@@ -50,9 +51,9 @@ const detailFields = computed(() => Object.entries(props.hospital.properties)
     </details>
     <div class="card-actions">
       <button class="button button-outline" type="button" @click="$emit('select', hospital)">Ver no mapa <span aria-hidden="true">↗</span></button>
-      <button class="button button-directions" type="button" :disabled="!hasUserLocation || routeLoading" :title="hasUserLocation ? 'Traçar rota rodoviária no mapa' : 'Partilhe a sua localização para criar uma rota'" @click="$emit('directions', hospital)">
+      <button class="button button-directions" type="button" :disabled="routeLoading || locating" :title="hasUserLocation ? 'Traçar rota rodoviária no mapa' : 'Ativar a localização para traçar a rota'" @click="$emit('directions', hospital)">
         <span v-if="routeLoading" class="button-spinner" aria-hidden="true"></span>
-        {{ routeLoading ? 'A traçar…' : 'Como chegar' }} <span v-if="!routeLoading" aria-hidden="true">→</span>
+        {{ routeLoading ? 'A traçar…' : locating && !hasUserLocation ? 'A obter localização…' : !hasUserLocation ? 'Ativar localização e traçar rota' : 'Como chegar' }} <span v-if="!routeLoading && !(locating && !hasUserLocation)" aria-hidden="true">→</span>
       </button>
     </div>
   </article>
