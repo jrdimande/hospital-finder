@@ -63,6 +63,9 @@ function findNearby() {
   nearbyActive.value = true
   showAllResults.value = false
   locate()
+  requestAnimationFrame(() => {
+    document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
 }
 
 function selectHospital(hospital, { scroll = true } = {}) {
