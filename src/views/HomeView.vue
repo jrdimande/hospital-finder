@@ -18,6 +18,7 @@ const selectedProvince = ref('')
 const distanceFilter = ref('all')
 const nearbyActive = ref(false)
 const selectedId = ref(null)
+const showAllResults = ref(false)
 const route = ref(null)
 const routeError = ref('')
 const routeLoadingId = ref(null)
@@ -49,14 +50,18 @@ const rankedHospitals = computed(() => searchedHospitals.value
     return a.distanceKm - b.distanceKm
   }))
 
-const visibleHospitals = computed(() => {
-  if (!nearbyActive.value) return rankedHospitals.value.slice(0, 6)
+const matchingHospitals = computed(() => {
+  if (!nearbyActive.value) return rankedHospitals.value
   const radius = distanceFilter.value === 'all' ? Infinity : Number(distanceFilter.value)
-  return rankedHospitals.value.filter((item) => item.distanceKm <= radius).slice(0, 5)
+  return rankedHospitals.value.filter((item) => item.distanceKm !== null && item.distanceKm <= radius)
 })
+const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
+
+watch([searchQuery, selectedProvince, distanceFilter, nearbyActive], () => { showAllResults.value = false })
 
 function findNearby() {
   nearbyActive.value = true
+  showAllResults.value = false
   locate()
 }
 
@@ -164,7 +169,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
               <span v-else-if="hospitals.length" class="map-total">{{ hospitals.length }} unidades <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
             </div>
             <HospitalMap
-              :hospitals="nearbyActive && location ? visibleHospitals.map((item) => item.hospital) : hospitals"
+              :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"
               :user-location="location"
               :selected-id="selectedId"
               :route="route"
@@ -185,6 +190,8 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           </div>
           <HospitalList
             :hospitals="visibleHospitals"
+            :total-count="matchingHospitals.length"
+            :showing-all="showAllResults"
             :selected-id="selectedId"
             :has-user-location="Boolean(location)"
             :locating="locating"
@@ -193,6 +200,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             v-model:distance-filter="distanceFilter"
             @select="selectHospital"
             @directions="showRoute"
+            @toggle-all="showAllResults = !showAllResults"
           />
         </div>
       </div>

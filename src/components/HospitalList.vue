@@ -3,6 +3,8 @@ import HospitalCard from './HospitalCard.vue'
 
 defineProps({
   hospitals: { type: Array, default: () => [] },
+  totalCount: { type: Number, default: 0 },
+  showingAll: { type: Boolean, default: false },
   selectedId: { type: [String, Number], default: null },
   hasUserLocation: { type: Boolean, default: false },
   locating: { type: Boolean, default: false },
@@ -11,7 +13,7 @@ defineProps({
   distanceFilter: { type: String, default: 'all' },
 })
 
-const emit = defineEmits(['select', 'directions', 'update:distanceFilter'])
+const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'toggle-all'])
 </script>
 
 <template>
@@ -32,8 +34,15 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter'])
           <option value="all">Todos</option>
         </select>
       </label>
-      <span v-if="hospitals.length" class="result-count">{{ hospitals.length }} {{ hospitals.length === 1 ? 'unidade' : 'unidades' }}</span>
+      <span v-if="totalCount" class="result-count">{{ totalCount }} {{ totalCount === 1 ? 'unidade' : 'unidades' }}</span>
     </div>
+    <button
+      v-if="showingAll || totalCount > hospitals.length"
+      class="show-all-button"
+      type="button"
+      :aria-expanded="showingAll"
+      @click="emit('toggle-all')"
+    >{{ showingAll ? 'Mostrar menos' : `Ver todas as ${totalCount} unidades` }} <span aria-hidden="true">{{ showingAll ? '↑' : '↓' }}</span></button>
     <div v-if="hospitals.length" class="hospital-list">
       <HospitalCard
         v-for="item in hospitals"
