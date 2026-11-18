@@ -62,10 +62,10 @@ watch([searchQuery, selectedProvince, distanceFilter, nearbyActive], () => { sho
 function findNearby() {
   nearbyActive.value = true
   showAllResults.value = false
-  locate()
   requestAnimationFrame(() => {
     document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
+  locate()
 }
 
 function selectHospital(hospital, { scroll = true } = {}) {
@@ -167,9 +167,9 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div id="mapa" class="map-layout">
           <div class="map-panel">
             <div class="map-panel-header">
-              <div><span class="map-live-dot"></span><strong>Hospitais, centros e postos de saúde</strong></div>
+              <div><span class="map-live-dot"></span><strong>{{ nearbyActive ? locating ? 'A procurar unidades perto de si…' : location ? 'Unidades perto de si' : 'Unidades sanitárias' : 'Hospitais, centros e postos de saúde' }}</strong></div>
               <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
-              <span v-else-if="hospitals.length" class="map-total">{{ hospitals.length }} unidades <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
+              <span v-else-if="hospitals.length" class="map-total">{{ nearbyActive && location ? matchingHospitals.length : hospitals.length }} unidades <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
             </div>
             <HospitalMap
               :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"
@@ -198,12 +198,14 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             :selected-id="selectedId"
             :has-user-location="Boolean(location)"
             :locating="locating"
+            :location-error="locationError"
             :route-loading-id="routeLoadingId"
             :nearby-active="nearbyActive"
             v-model:distance-filter="distanceFilter"
             @select="selectHospital"
             @directions="showRoute"
             @toggle-all="showAllResults = !showAllResults"
+            @retry-location="findNearby"
           />
         </div>
       </div>

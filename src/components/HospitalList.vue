@@ -8,12 +8,13 @@ defineProps({
   selectedId: { type: [String, Number], default: null },
   hasUserLocation: { type: Boolean, default: false },
   locating: { type: Boolean, default: false },
+  locationError: { type: String, default: '' },
   routeLoadingId: { type: [String, Number], default: null },
   nearbyActive: { type: Boolean, default: false },
   distanceFilter: { type: String, default: 'all' },
 })
 
-const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'toggle-all'])
+const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'toggle-all', 'retry-location'])
 </script>
 
 <template>
@@ -58,8 +59,10 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
     </div>
     <div v-else class="empty-state">
       <span class="empty-icon" aria-hidden="true">⌖</span>
-      <strong>{{ locating ? 'A obter a sua localização…' : nearbyActive && !hasUserLocation ? 'Partilhe a sua localização para encontrar hospitais próximos.' : nearbyActive ? 'Não encontrámos hospitais neste raio.' : 'Nenhuma unidade encontrada.' }}</strong>
-      <p>{{ locating ? 'Assim que a localização estiver disponível, mostramos as unidades mais próximas.' : nearbyActive && !hasUserLocation ? 'A localização só é usada depois da sua autorização.' : nearbyActive ? 'Experimente aumentar o raio ou escolher “Todos os hospitais”.' : 'Tente alterar a pesquisa ou o filtro de província.' }}</p>
+      <strong>{{ locating ? 'A obter a sua localização…' : nearbyActive && !hasUserLocation ? locationError ? 'Não conseguimos obter a localização.' : 'Ative a localização para ver unidades próximas.' : nearbyActive ? 'Não encontrámos unidades neste raio.' : 'Nenhuma unidade encontrada.' }}</strong>
+      <p>{{ locating ? 'Assim que estiver disponível, ordenamos as unidades pela distância.' : nearbyActive && !hasUserLocation ? locationError || 'O navegador pode pedir autorização. A sua localização só é usada para calcular distâncias.' : nearbyActive ? 'Aumente o raio para procurar numa área maior.' : 'Tente alterar a pesquisa ou o filtro de província.' }}</p>
+      <button v-if="nearbyActive && !hasUserLocation && !locating" class="button button-primary empty-retry" type="button" @click="emit('retry-location')">Tentar novamente</button>
+      <button v-if="nearbyActive && hasUserLocation" class="button button-outline empty-retry" type="button" @click="emit('update:distanceFilter', 'all')">Ver unidades em qualquer distância</button>
     </div>
   </section>
 </template>
