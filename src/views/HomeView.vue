@@ -11,7 +11,7 @@ import { useHospitals } from '../composables/useHospitals'
 import { fetchDrivingRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
 
-const { hospitals, loading, error, provinces, reload } = useHospitals()
+const { hospitals, loading, error, updatedAt, provinces, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
 const searchQuery = ref('')
 const selectedProvince = ref('')
@@ -161,7 +161,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>Hospitais, centros e postos de saúde</strong></div>
               <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
-              <span v-else-if="hospitals.length" class="map-total">{{ hospitals.length }} unidades</span>
+              <span v-else-if="hospitals.length" class="map-total">{{ hospitals.length }} unidades <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
             </div>
             <HospitalMap
               :hospitals="nearbyActive && location ? visibleHospitals.map((item) => item.hospital) : hospitals"
@@ -229,6 +229,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
       <div class="footer-column"><strong>Fontes</strong><a href="https://www.mozgis.gov.mz/" target="_blank" rel="noreferrer">Dados: MozGIS ↗</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapa e rotas: OpenStreetMap ↗</a></div>
       <div class="footer-column"><strong>Contacto</strong><span>Contacto do projeto não disponibilizado.</span><span>Projeto informativo</span></div>
     </div>
-    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde MZ</span><span>Os dados podem não refletir alterações recentes. Confirme a informação junto da unidade.</span></div>
+    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde MZ</span><span>Os dados MozGIS no site são atualizados automaticamente a cada 6 horas. Confirme a informação junto da unidade.</span></div>
   </footer>
 </template>

@@ -1,6 +1,5 @@
-const SERVICE_URL = import.meta.env.DEV
-  ? '/api/mozgis/MEF/MEFAAPUnidadesSanitarias/MapServer'
-  : 'https://www.mozgis.gov.mz/server/rest/services/MEF/MEFAAPUnidadesSanitarias/MapServer'
+const SERVICE_URL = '/api/mozgis/MEF/MEFAAPUnidadesSanitarias/MapServer'
+const STATIC_DATA_URL = `${import.meta.env.BASE_URL}data/unidades.geojson`
 
 const FACILITY_LAYERS = [
   { id: 5, category: 'Hospital' },
@@ -35,38 +34,41 @@ async function fetchLayer({ id, category }) {
     throw new Error(`A resposta da camada “${category}” não contém uma lista de unidades sanitárias válida.`)
   }
 
-  const facilities = data.features.flatMap((feature, index) => {
-    const coordinates = feature?.geometry?.coordinates
-    const properties = feature?.properties
-
-    if (
-      feature?.geometry?.type !== 'Point' ||
-      !Array.isArray(coordinates) ||
-      coordinates.length < 2 ||
-      !Number.isFinite(coordinates[0]) ||
-      !Number.isFinite(coordinates[1]) ||
-      !properties ||
-      typeof properties !== 'object'
-    ) {
-      return []
-    }
-
-    const [longitude, latitude] = coordinates
-    return [{
-      id: `${id}:${feature.id ?? properties.OBJECTID ?? `${longitude},${latitude},${index}`}`,
-      category,
-      latitude,
-      longitude,
-      name: properties.Nome || properties.name || 'Unidade sanitária sem nome',
-      type: properties.Tipo || properties.type || '',
-      properties,
-    }]
-  })
-
-  return { category, facilities }
+  return { category, facilities: normalizeFeatures(data.features, id, category) }
 }
 
 export async function fetchHospitals() {
+  if (import.meta.env.PROD) {
+    let response
+    try {
+      response = await fetch(STATIC_DATA_URL, { cache: 'no-store' })
+    } catch {
+      throw new Error('Não foi possível carregar os dados MozGIS publicados. Tente novamente mais tarde.')
+    }
+
+    if (!response.ok) {
+      throw new Error(`Os dados MozGIS publicados responderam com o erro HTTP ${response.status}.`)
+    }
+
+    let data
+    try {
+      data = await response.json()
+    } catch {
+      throw new Error('Os dados MozGIS publicados não contêm GeoJSON válido.')
+    }
+
+    if (!Array.isArray(data?.features)) {
+      throw new Error('Os dados MozGIS publicados não contêm unidades sanitárias válidas.')
+    }
+
+    const facilities = FACILITY_LAYERS.flatMap(({ id, category }) =>
+      normalizeFeatures(data.features.filter((feature) => feature.category === category), id, category))
+    if (!facilities.length) {
+      throw new Error('Os dados MozGIS publicados não contêm unidades sanitárias com coordenadas válidas.')
+    }
+    return { facilities, errors: [], updatedAt: data.generatedAt || null }
+  }
+
   const results = await Promise.allSettled(FACILITY_LAYERS.map(fetchLayer))
   const facilities = []
   const errors = []
@@ -88,4 +90,35 @@ export async function fetchHospitals() {
   }
 
   return { facilities, errors }
+}
+
+function normalizeFeatures(features, layerId, category) {
+  return features.flatMap((feature, index) => {
+    const coordinates = feature?.geometry?.coordinates
+    const properties = feature?.properties
+
+    if (
+      feature?.geometry?.type !== 'Point' ||
+      !Array.isArray(coordinates) ||
+      coordinates.length < 2 ||
+      !Number.isFinite(coordinates[0]) ||
+      !Number.isFinite(coordinates[1]) ||
+      !properties ||
+      typeof properties !== 'object'
+    ) {
+      return []
+    }
+
+    const [longitude, latitude] = coordinates
+    const sourceId = String(feature.id ?? properties.OBJECTID ?? `${longitude},${latitude},${index}`)
+    return [{
+      id: sourceId.startsWith(`${layerId}:`) ? sourceId : `${layerId}:${sourceId}`,
+      category,
+      latitude,
+      longitude,
+      name: properties.Nome || properties.name || 'Unidade sanitária sem nome',
+      type: properties.Tipo || properties.type || '',
+      properties,
+    }]
+  })
 }

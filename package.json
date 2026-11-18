@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "fetch:data": "node scripts/fetch-mozgis-data.js",
+    "build": "npm run fetch:data && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

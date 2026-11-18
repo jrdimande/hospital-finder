@@ -6,6 +6,7 @@ export function useHospitals() {
   const loading = ref(false)
   const error = ref('')
   const loaded = ref(false)
+  const updatedAt = ref(null)
 
   const provinces = computed(() => {
     const values = hospitals.value
@@ -19,13 +20,14 @@ export function useHospitals() {
     error.value = ''
 
     try {
-      const { facilities, errors } = await fetchHospitals()
+      const { facilities, errors, updatedAt: sourceUpdatedAt } = await fetchHospitals()
       if (!facilities.length) {
         hospitals.value = []
         error.value = 'A API do MozGIS não devolveu unidades sanitárias com coordenadas válidas.'
         return
       }
       hospitals.value = facilities
+      updatedAt.value = sourceUpdatedAt
       if (errors.length) {
         error.value = `Algumas categorias não puderam ser carregadas: ${errors.join(' ')}`
       }
@@ -39,5 +41,5 @@ export function useHospitals() {
 
   onMounted(loadHospitals)
 
-  return { hospitals, loading, error, loaded, provinces, reload: loadHospitals }
+  return { hospitals, loading, error, loaded, updatedAt, provinces, reload: loadHospitals }
 }
