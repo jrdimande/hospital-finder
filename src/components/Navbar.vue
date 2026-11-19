@@ -7,7 +7,6 @@
       </a>
       <div class="nav-links">
         <a href="#inicio">Início</a>
-        <a href="#encontrar">Encontrar hospitais</a>
         <a href="#sobre">Sobre o projeto</a>
         <a href="#contacto">Contacto</a>
       </div>
