@@ -4,6 +4,7 @@ import HeroSection from '../components/HeroSection.vue'
 import HospitalList from '../components/HospitalList.vue'
 import HospitalMap from '../components/HospitalMap.vue'
 import LoadingState from '../components/LoadingState.vue'
+import BrandMark from '../components/BrandMark.vue'
 import Navbar from '../components/Navbar.vue'
 import SearchBar from '../components/SearchBar.vue'
 import { useGeolocation } from '../composables/useGeolocation'
@@ -344,7 +345,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
   <footer id="contacto" class="site-footer">
     <div class="page-shell footer-main">
       <div class="footer-brand">
-        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><span></span></span><span>Hospital finder <strong>MZ</strong></span></a>
+        <BrandMark />
         <p>Mais perto dos cuidados de saúde em Moçambique.</p>
       </div>
       <div class="footer-column"><strong>Explorar</strong><a href="#encontrar">Encontrar hospitais</a><a href="#/info">Info</a></div>
