@@ -49,7 +49,14 @@ function renderHospitals() {
       fillOpacity: 0.94,
       bubblingMouseEvents: false,
     }).bindPopup(popupContent(hospital))
-    marker.on('click', () => emit('select', hospital))
+    // Leaflet adds its own click handler for bound popups; replace it so the
+    // same marker explicitly toggles its information on each tap.
+    marker.off('click')
+    marker.on('click', () => {
+      emit('select', hospital)
+      if (marker.isPopupOpen()) marker.closePopup()
+      else marker.openPopup()
+    })
     marker.addTo(hospitalLayer)
     markerById.set(hospital.id, marker)
   })
