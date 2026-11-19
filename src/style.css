@@ -35,8 +35,15 @@ button { cursor: pointer; }
 .mark-route { fill: var(--blue); }
 .mark-cross { fill: white; }
 .mark-dot { fill: #a8ded0; }
-.nav-links { display: flex; align-items: center; gap: 30px; color: #627587; font-size: 13px; font-weight: 600; }
-.nav-links a:hover, .footer-column a:hover { color: var(--blue); }
+.nav-menu-wrap { position: relative; margin-left: auto; margin-right: 22px; }
+.menu-toggle { width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid #dce6e1; border-radius: 5px; background: white; transition: border-color .18s ease, background .18s ease; }
+.menu-toggle:hover, .menu-toggle[aria-expanded="true"] { border-color: #a8c9bb; background: #f5f9f6; }
+.menu-toggle span { display: block; width: 17px; height: 2px; border-radius: 1px; background: #35566a; }
+.nav-menu { position: absolute; z-index: 30; top: calc(100% + 9px); right: 0; display: grid; width: 235px; padding: 5px; border: 1px solid #dce6e1; border-radius: 5px; background: white; box-shadow: 0 8px 22px #17364b18; }
+.nav-menu a { padding: 11px 12px; color: #405b6e; font-size: 13px; font-weight: 600; }
+.nav-menu a + a { border-top: 1px solid #edf1ee; }
+.nav-menu a:hover { background: #f5f9f6; color: var(--blue); }
+.footer-column a:hover { color: var(--blue); }
 .nav-action { display: inline-flex; align-items: center; gap: 12px; color: var(--blue); background: #eef7fa; border-radius: 8px; padding: 11px 15px; font-weight: 700; font-size: 12px; }
 .nav-action span { font-size: 16px; }
 
@@ -306,8 +313,6 @@ button { cursor: pointer; }
 
 @media (max-width: 900px) {
   .page-shell { width: min(100% - 40px, 720px); }
-  .nav-links { gap: 14px; }
-  .nav-links a { font-size: 10px; }
   .nav-action { display: none; }
   .hero { grid-template-columns: 1fr .72fr; min-height: 390px; }
   .hero-art { height: 285px; margin-left: 0; }
@@ -325,9 +330,7 @@ button { cursor: pointer; }
   .site-header { height: 64px; }
   .brand { font-size: 17px; }
   .brand-mark { width: 26px; height: 26px; }
-  .nav-links { gap: 0; }
-  .nav-links a { display: none; }
-  .nav-links a:nth-child(2) { display: inline; padding: 0; color: #627587; font-size: 12px; }
+  .nav-menu-wrap { margin-right: 0; }
   .hero { display: flex; flex-direction: column; align-items: stretch; padding-top: 38px; min-height: 0; }
   .hero-copy { padding-bottom: 18px; }
   .hero h1 { font-size: clamp(37px, 10vw, 47px); letter-spacing: -1.4px; margin-top: 17px; }
