@@ -244,9 +244,9 @@ button { cursor: pointer; }
   .site-header { height: 64px; }
   .brand { font-size: 17px; }
   .brand-mark { width: 28px; height: 28px; border-radius: 8px; }
-  .nav-links { gap: 0; }
+  .nav-links { gap: 6px; }
   .nav-links a { display: none; }
-  .nav-links a:nth-child(2) { display: inline; border-radius: 6px; padding: 9px 10px; background: #eef7fa; color: var(--blue); font-size: 10px; }
+  .nav-links .nav-mobile-link { display: inline-flex; align-items: center; min-height: 44px; border-radius: 6px; padding: 0 8px; background: #eef7fa; color: var(--blue); font-size: 10px; }
   .hero { display: flex; flex-direction: column; align-items: stretch; padding-top: 38px; min-height: 0; }
   .hero-copy { padding-bottom: 18px; }
   .hero h1 { font-size: clamp(37px, 10vw, 47px); letter-spacing: -1.4px; margin-top: 17px; }
