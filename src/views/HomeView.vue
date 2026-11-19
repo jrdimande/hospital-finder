@@ -352,6 +352,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
       <div class="footer-column"><strong>Fontes</strong><a href="https://www.mozgis.gov.mz/" target="_blank" rel="noreferrer">Dados: MozGIS ↗</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapa e rotas: OpenStreetMap ↗</a></div>
       <div class="footer-column"><strong>Contacto</strong><span>Contacto do projeto não disponibilizado.</span><span>Projeto informativo</span></div>
     </div>
-    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Hospital finder MZ</span><span>Confirme a informação diretamente junto da unidade sanitária.</span></div>
+    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde Perto</span><span>Confirme a informação diretamente junto da unidade sanitária.</span></div>
   </footer>
 </template>

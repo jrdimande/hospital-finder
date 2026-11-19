@@ -19,12 +19,12 @@ const formattedUpdate = computed(() => updatedAt.value
           <div class="about-map-lines"></div>
           <div class="about-cross"><span></span><i></i></div>
           <span class="about-point point-a"></span><span class="about-point point-b"></span><span class="about-point point-c"></span>
-          <div class="about-caption"><span class="live-dot"></span> Saúde mais perto, para todos</div>
+          <div class="about-caption">Unidades de saúde em Moçambique</div>
         </div>
         <div class="about-copy">
-          <div class="section-kicker"><span></span> SOBRE O HOSPITAL FINDER MZ</div>
+          <div class="section-kicker"><span></span> SOBRE O SAÚDE PERTO</div>
           <h1>Informação que ajuda a chegar a tempo.</h1>
-          <p>O Hospital finder MZ ajuda a encontrar hospitais, centros e postos de saúde em Moçambique, consultar a sua localização no mapa e iniciar uma rota.</p>
+          <p>O Saúde Perto reúne hospitais, centros e postos de saúde de Moçambique num só mapa. Pesquise uma localidade, veja as unidades próximas e trace o caminho até lá.</p>
           <div class="about-points">
             <div><span class="check-mark">✓</span><span><strong>Dados geográficos abertos</strong><small>As unidades sanitárias são obtidas das camadas públicas do MozGIS.</small></span></div>
             <div><span class="check-mark">✓</span><span><strong>Pesquisa e mapa</strong><small>Pesquise unidades e localidades; locais adicionais podem vir do OpenStreetMap.</small></span></div>
@@ -79,6 +79,6 @@ const formattedUpdate = computed(() => updatedAt.value
       <div class="footer-column"><strong>Fontes</strong><a href="https://www.mozgis.gov.mz/" target="_blank" rel="noreferrer">Dados: MozGIS ↗</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapa: OpenStreetMap ↗</a></div>
       <div class="footer-column"><strong>Contacto</strong><span>Contacto do projeto não disponibilizado.</span><span>Projeto informativo</span></div>
     </div>
-    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Hospital finder MZ</span><span>Confirme a informação diretamente junto da unidade sanitária.</span></div>
+    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde Perto</span><span>Confirme a informação diretamente junto da unidade sanitária.</span></div>
   </footer>
 </template>

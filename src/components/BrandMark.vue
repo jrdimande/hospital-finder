@@ -1,12 +1,10 @@
 <template>
-  <a class="brand" href="#inicio" aria-label="Hospital finder MZ — início">
-    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-      <path
-        class="mark-pin"
-        fill-rule="evenodd"
-        d="M16 28.8c.3 0 9.6-9.7 9.6-16.1C25.6 7 21.3 2.8 16 2.8S6.4 7 6.4 12.7C6.4 19.1 15.7 28.8 16 28.8zM14.9 8.5h2.2v2.5h2.5v2.2h-2.5v2.5h-2.2v-2.5H12.4v-2.2h2.5V8.5z"
-      />
+  <a class="brand" href="#inicio" aria-label="Saúde Perto — início">
+    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+      <path class="mark-route" d="M20 35S7.5 24.2 7.5 15.8a12.5 12.5 0 1 1 25 0C32.5 24.2 20 35 20 35Z" />
+      <path class="mark-cross" d="M18 9.8h4v4.2h4.2v4H22v4.2h-4v-4.2h-4.2v-4H18z" />
+      <circle class="mark-dot" cx="20" cy="29" r="1.6" />
     </svg>
-    <span>Hospital finder <strong>MZ</strong></span>
+    <span>Saúde <strong>Perto</strong></span>
   </a>
 </template>
