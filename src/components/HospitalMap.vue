@@ -52,6 +52,7 @@ function facilityIcon(category, selected = false) {
 
 function renderHospitals() {
   if (!map || !hospitalLayer) return
+  const openPopupId = [...markerById.entries()].find(([, marker]) => marker.isPopupOpen())?.[0]
   hospitalLayer.clearLayers()
   markerById = new Map()
 
@@ -60,13 +61,15 @@ function renderHospitals() {
       icon: facilityIcon(hospital.category),
       title: hospital.name,
       riseOnHover: true,
-    }).bindPopup(popupContent(hospital), { closeOnClick: false })
+    }).bindPopup(popupContent(hospital), { closeOnClick: false, closeOnEscapeKey: false })
     marker.on('click', () => emit('select', hospital))
     marker.addTo(hospitalLayer)
     markerById.set(hospital.id, marker)
   })
 
   updateSelectedMarker()
+  const openPopupMarker = markerById.get(openPopupId)
+  if (openPopupMarker) openPopupMarker.openPopup()
   const points = props.hospitals.map(({ latitude, longitude }) => [latitude, longitude])
   if (points.length && !props.userLocation && !hasFittedInitialBounds) {
     map.fitBounds(points, { padding: [42, 42], maxZoom: 7 })
