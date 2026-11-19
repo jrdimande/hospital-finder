@@ -28,6 +28,7 @@ const pharmacyPlaces = ref([])
 const pharmacySearchLoading = ref(false)
 const pharmacySearchDone = ref(false)
 const pharmacySearchError = ref('')
+const nearestPharmacyRoutePending = ref(false)
 const placeSearchLoading = ref(false)
 const placeSearchError = ref('')
 const placeSearchMessage = ref('')
@@ -89,6 +90,7 @@ async function loadNearbyPharmacies(currentLocation) {
     if (requestId !== pharmacyRequestId) return
     pharmacyPlaces.value = results
     pharmacySearchDone.value = true
+    routeToNearestPharmacy(results)
   } catch (cause) {
     if (requestId === pharmacyRequestId) {
       pharmacySearchError.value = cause instanceof Error ? cause.message : 'Não foi possível procurar farmácias próximas.'
@@ -103,6 +105,40 @@ function retryPharmacySearch() {
   if (location.value) loadNearbyPharmacies(location.value)
 }
 
+function routeToNearestPharmacy(results = pharmacyPlaces.value) {
+  if (!nearestPharmacyRoutePending.value) return
+  nearestPharmacyRoutePending.value = false
+  const nearestPharmacy = [...results]
+    .sort((a, b) => haversineDistanceKm(location.value, a) - haversineDistanceKm(location.value, b))[0]
+  if (nearestPharmacy) showRoute(nearestPharmacy, { scroll: false })
+}
+
+function findNearestPharmacy() {
+  clearRoute()
+  nearbyActive.value = true
+  showAllResults.value = false
+  autoRoutePending.value = false
+  nearestPharmacyRoutePending.value = true
+
+  if (location.value && pharmacySearchDone.value) {
+    routeToNearestPharmacy()
+  } else if (location.value && !pharmacySearchLoading.value) {
+    pharmacySearchCenter = null
+    loadNearbyPharmacies(location.value)
+  } else if (!location.value) {
+    locate()
+  }
+
+  requestAnimationFrame(() => {
+    document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
+
+function isNearestPharmacyQuery(query) {
+  const normalized = query.trim().toLocaleLowerCase('pt').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return /^(farmacia|farmacias|farmacia proxima|farmacia mais proxima|farmacia proxima de mim|farmacia mais proxima de mim|farmacia perto de mim|farmacias proximas|farmacias mais proximas|farmacias perto de mim)$/.test(normalized)
+}
+
 watch(routeMode, () => {
   if (!route.value) return
   const destination = [...hospitals.value, ...mapPlaces.value, ...pharmacyPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
@@ -111,6 +147,7 @@ watch(routeMode, () => {
 
 watch([searchQuery, nearbyActive], () => { showAllResults.value = false })
 watch(searchQuery, () => {
+  nearestPharmacyRoutePending.value = false
   placeSearchRequestId += 1
   mapPlaces.value = []
   placeSearchError.value = ''
@@ -121,6 +158,10 @@ watch(searchQuery, () => {
 })
 
 async function searchPlaces() {
+  if (isNearestPharmacyQuery(searchQuery.value)) {
+    findNearestPharmacy()
+    return
+  }
   clearRoute()
   selectedId.value = null
   nearbyActive.value = false
@@ -290,12 +331,17 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div class="search-heading">
           <div class="section-kicker"><span></span> PESQUISA</div>
           <h2>Encontre cuidados de saúde</h2>
-          <p>Pesquise pelo nome de um hospital, centro de saúde ou localidade.</p>
+          <p>Pesquise uma unidade pelo nome ou procure a farmácia mais próxima e trace a rota automaticamente.</p>
         </div>
         <SearchBar
           v-model="searchQuery"
           @search="searchPlaces"
         />
+        <button class="nearby-pharmacy-action" type="button" :disabled="pharmacySearchLoading || locating" @click="findNearestPharmacy">
+          <span class="pharmacy-action-icon" aria-hidden="true">+</span>
+          <span class="pharmacy-action-copy"><strong>{{ locating ? 'A obter localização…' : pharmacySearchLoading ? 'A procurar farmácia…' : 'Encontrar farmácia mais próxima' }}</strong><small>Usa a sua localização e traça a rota automaticamente.</small></span>
+          <span class="pharmacy-action-arrow" aria-hidden="true">→</span>
+        </button>
         <p class="search-hint">Se a unidade não estiver nos dados MozGIS, pesquisamos o local no OpenStreetMap.</p>
 
         <div v-if="placeSearchLoading" class="place-search-status" role="status">
