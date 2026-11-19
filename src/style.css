@@ -31,13 +31,13 @@ button { cursor: pointer; }
 
 .site-header { height: 78px; background: rgba(255,255,255,.96); border-bottom: 1px solid #eef2f4; position: relative; z-index: 20; }
 .navbar { height: 100%; display: flex; align-items: center; justify-content: space-between; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-family: Manrope, sans-serif; font-size: 19px; font-weight: 600; color: var(--navy); letter-spacing: -.7px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-family: Manrope, sans-serif; font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: -.6px; white-space: nowrap; }
 .brand strong { color: var(--blue); font-weight: 800; }
 .brand-mark { width: 31px; height: 31px; border-radius: 10px; background: var(--blue); display: grid; place-items: center; position: relative; box-shadow: 0 5px 12px #176f9f33; }
 .brand-mark::before, .brand-mark::after, .brand-mark span { content: ''; display: block; position: absolute; background: white; border-radius: 2px; }
 .brand-mark::before { width: 15px; height: 4px; }
 .brand-mark::after { width: 4px; height: 15px; }
-.nav-links { display: flex; align-items: center; gap: 35px; color: #627587; font-size: 13px; font-weight: 500; }
+.nav-links { display: flex; align-items: center; gap: 30px; color: #627587; font-size: 13px; font-weight: 600; }
 .nav-links a:hover, .footer-column a:hover { color: var(--blue); }
 .nav-action { display: inline-flex; align-items: center; gap: 12px; color: var(--blue); background: #eef7fa; border-radius: 8px; padding: 11px 15px; font-weight: 700; font-size: 12px; }
 .nav-action span { font-size: 16px; }
@@ -91,22 +91,26 @@ button { cursor: pointer; }
 .hero-stats strong { align-self: end; color: #294254; font-size: 11px; }
 .hero-stats small { align-self: start; color: #8998a4; font-size: 9px; padding-top: 3px; }
 
-.finder-section { background: var(--pale); padding: 32px 0 68px; border-top: 1px solid #f0f4f6; }
-.search-bar { display: flex; min-height: 58px; border: 1px solid #e4ebef; border-radius: 9px; background: white; align-items: center; padding: 7px; box-shadow: 0 9px 25px #25465e08; }
+.finder-section { background: var(--pale); padding: 42px 0 68px; border-top: 1px solid #f0f4f6; }
+.search-heading { margin-bottom: 18px; }
+.search-heading h2 { margin: 8px 0 4px; color: var(--navy); font: 750 23px/1.25 Manrope, sans-serif; letter-spacing: -.65px; }
+.search-heading p { margin: 0; color: #718394; font-size: 13px; }
+.search-bar { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(210px, 270px) auto; gap: 8px; min-height: 82px; border: 1px solid #e4ebef; border-radius: 12px; background: white; align-items: stretch; padding: 10px; box-shadow: 0 9px 25px #25465e08; }
 .search-hint { margin: 7px 3px 0; color: #718594; font-size: 11px; }
 .place-search-status { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 12px 14px; border: 1px solid #dce9ed; border-radius: 8px; background: #fff; color: #526f80; font-size: 12px; line-height: 1.5; }
 .place-search-status .loading-spinner { width: 18px; height: 18px; flex: none; }
-.search-input-wrap, .province-select { display: flex; align-items: center; position: relative; height: 42px; }
-.search-input-wrap { flex: 1; padding-inline: 14px; }
+.search-input-wrap, .province-select { display: flex; align-items: end; position: relative; height: 60px; padding: 22px 13px 5px; border: 1px solid #e8edef; border-radius: 8px; background: #fff; }
+.search-input-wrap { min-width: 0; }
+.field-label { position: absolute; top: 7px; left: 13px; color: #6f8492; font-size: 10px; font-weight: 700; letter-spacing: .2px; }
 .search-input-wrap svg, .province-select svg { flex: none; width: 16px; height: 16px; fill: none; stroke: #91a1ad; stroke-width: 1.7; }
-.search-input-wrap input { border: 0; outline: 0; width: 100%; padding: 0 11px; color: #344c5e; font-size: 11px; background: transparent; }
+.search-input-wrap input { border: 0; outline: 0; width: 100%; min-width: 0; padding: 0 0 0 10px; color: #344c5e; font-size: 14px; background: transparent; }
 .search-input-wrap input::placeholder { color: #a0adb7; }
-.province-select { width: 205px; padding: 0 14px; gap: 9px; border-left: 1px solid #e8edef; }
-.province-select select { width: 100%; appearance: none; border: 0; outline: 0; background: transparent; color: #617687; font-size: 10px; cursor: pointer; }
+.province-select { gap: 9px; }
+.province-select select { width: 100%; appearance: none; border: 0; outline: 0; background: transparent; color: #526b7b; font-size: 13px; cursor: pointer; }
 .select-chevron { color: #8999a4; font-size: 16px; pointer-events: none; }
-.search-button { height: 42px; padding: 0 18px; background: #e9f4f8; color: var(--blue); font-size: 11px; }
+.search-button { min-height: 60px; padding: 0 22px; background: #e9f4f8; color: var(--blue); font-size: 13px; white-space: nowrap; }
 .search-button:hover { background: #dceef4; }
-.search-button span { font-size: 16px; }
+.search-button > span:last-child { font-size: 16px; }
 .notice { display: flex; gap: 11px; align-items: flex-start; margin-top: 17px; padding: 13px 15px; border-radius: 8px; font-size: 12px; line-height: 1.55; }
 .notice > span { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-weight: 700; }
 .notice p { margin: 0; }
@@ -280,8 +284,8 @@ button { cursor: pointer; }
 
 @media (max-width: 900px) {
   .page-shell { width: min(100% - 40px, 720px); }
-  .nav-links { gap: 18px; }
-  .nav-links a { font-size: 11px; }
+  .nav-links { gap: 14px; }
+  .nav-links a { font-size: 10px; }
   .nav-action { display: none; }
   .hero { grid-template-columns: 1fr .72fr; min-height: 390px; }
   .hero-art { height: 285px; margin-left: 0; }
@@ -319,10 +323,12 @@ button { cursor: pointer; }
   .hero-stats > div { padding: 8px 2px; }
   .hero-stats small { font-size: 9px; }
   .finder-section { padding: 40px 0 48px; }
-  .search-bar { flex-wrap: wrap; padding: 7px; }
-  .search-input-wrap { min-width: 100%; flex-basis: 100%; height: 42px; border-bottom: 1px solid #edf1f2; }
-  .province-select { width: calc(100% - 112px); border-left: 0; padding-left: 10px; }
-  .search-button { flex: 1; padding-inline: 10px; }
+  .search-heading h2 { font-size: 21px; }
+  .search-bar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding: 9px; }
+  .search-input-wrap { grid-column: 1 / -1; }
+  .province-select { min-width: 0; padding-inline: 9px; }
+  .province-select .field-label { left: 9px; }
+  .search-button { min-width: 0; padding-inline: 10px; font-size: 11px; }
   .map-layout { gap: 13px; margin-top: 17px; }
   .leaflet-map { height: min(68svh, 560px); min-height: 300px; }
   .route-summary { padding: 9px 10px; gap: 8px; }
