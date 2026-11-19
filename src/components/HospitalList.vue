@@ -12,10 +12,9 @@ defineProps({
   hasExternalResults: { type: Boolean, default: false },
   routeLoadingId: { type: [String, Number], default: null },
   nearbyActive: { type: Boolean, default: false },
-  distanceFilter: { type: String, default: 'all' },
 })
 
-const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'toggle-all', 'retry-location'])
+const emit = defineEmits(['select', 'directions', 'toggle-all', 'retry-location'])
 </script>
 
 <template>
@@ -24,19 +23,10 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
       <div>
         <div class="section-kicker"><span></span> RESULTADOS</div>
         <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de si' : hasExternalResults ? 'Locais encontrados no mapa' : 'Unidades sanitárias' }}</h2>
-        <p v-if="nearbyActive">Ordenados pela distância em linha reta</p>
+        <p v-if="nearbyActive">Unidades mais próximas, ordenadas por distância</p>
         <p v-else-if="hasExternalResults">Resultados do OpenStreetMap; consulte a origem em cada cartão.</p>
         <p v-else>Unidades disponíveis nos dados do MozGIS</p>
       </div>
-      <label v-if="nearbyActive" class="radius-filter">
-        <span>Raio</span>
-        <select :value="distanceFilter" @change="emit('update:distanceFilter', $event.target.value)">
-          <option value="5">Até 5 km</option>
-          <option value="10">Até 10 km</option>
-          <option value="20">Até 20 km</option>
-          <option value="all">Todos</option>
-        </select>
-      </label>
       <span v-if="totalCount" class="result-count">{{ totalCount }} {{ hasExternalResults && !nearbyActive ? totalCount === 1 ? 'local' : 'locais' : totalCount === 1 ? 'unidade' : 'unidades' }}</span>
     </div>
     <button
@@ -62,10 +52,9 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
     </div>
     <div v-else class="empty-state">
       <span class="empty-icon" aria-hidden="true">⌖</span>
-      <strong>{{ locating ? 'A obter a sua localização…' : nearbyActive && !hasUserLocation ? locationError ? 'Não conseguimos obter a localização.' : 'Ative a localização para ver unidades próximas.' : nearbyActive ? 'Não encontrámos unidades neste raio.' : 'Nenhuma unidade encontrada.' }}</strong>
-      <p>{{ locating ? 'Assim que estiver disponível, ordenamos as unidades pela distância.' : nearbyActive && !hasUserLocation ? locationError || 'O navegador pode pedir autorização. A sua localização só é usada para calcular distâncias.' : nearbyActive ? 'Aumente o raio para procurar numa área maior.' : 'Tente alterar a pesquisa ou o filtro de província.' }}</p>
+      <strong>{{ locating ? 'A obter a sua localização…' : nearbyActive && !hasUserLocation ? locationError ? 'Não conseguimos obter a localização.' : 'Ative a localização para ver unidades próximas.' : nearbyActive ? 'Não encontrámos unidades próximas.' : 'Nenhuma unidade encontrada.' }}</strong>
+      <p>{{ locating ? 'Assim que estiver disponível, ordenamos as unidades pela distância.' : nearbyActive && !hasUserLocation ? locationError || 'O navegador pode pedir autorização. A sua localização só é usada para calcular distâncias.' : nearbyActive ? 'Tente novamente mais tarde ou pesquise por uma localidade.' : 'Tente alterar a pesquisa.' }}</p>
       <button v-if="nearbyActive && !hasUserLocation && !locating" class="button button-primary empty-retry" type="button" @click="emit('retry-location')">Tentar novamente</button>
-      <button v-if="nearbyActive && hasUserLocation" class="button button-outline empty-retry" type="button" @click="emit('update:distanceFilter', 'all')">Ver unidades em qualquer distância</button>
     </div>
   </section>
 </template>

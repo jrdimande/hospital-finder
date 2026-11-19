@@ -15,7 +15,6 @@ import { haversineDistanceKm } from '../utils/distance'
 const { hospitals, loading, error, updatedAt, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
 const searchQuery = ref('')
-const distanceFilter = ref('all')
 const nearbyActive = ref(false)
 const selectedId = ref(null)
 const showAllResults = ref(false)
@@ -62,13 +61,12 @@ const rankedHospitals = computed(() => [
 
 const matchingHospitals = computed(() => {
   if (!nearbyActive.value) return rankedHospitals.value
-  const radius = distanceFilter.value === 'all' ? Infinity : Number(distanceFilter.value)
-  return rankedHospitals.value.filter((item) => item.distanceKm !== null && item.distanceKm <= radius)
+  return rankedHospitals.value.filter((item) => item.distanceKm !== null)
 })
 const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
 const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || nearbyActive.value))
 
-watch([searchQuery, distanceFilter, nearbyActive], () => { showAllResults.value = false })
+watch([searchQuery, nearbyActive], () => { showAllResults.value = false })
 watch(searchQuery, () => {
   placeSearchRequestId += 1
   mapPlaces.value = []
@@ -276,15 +274,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>Mapa de unidades sanitárias</strong></div>
               <div class="map-header-actions">
-                <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
-                <span v-else-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }} <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
-                <details class="map-help">
-                  <summary>Como funciona</summary>
-                  <div class="map-help-popover">
-                    <p>Pesquise uma unidade ou use a sua localização para ver opções próximas.</p>
-                    <p>Escolha um resultado para o destacar no mapa. Em <strong>Como chegar</strong>, calculamos a rota a partir da sua localização.</p>
-                  </div>
-                </details>
+                <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }} <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
               </div>
             </div>
             <HospitalMap
@@ -305,7 +295,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
               <span><i class="legend-dot post-dot"></i> Posto de saúde</span>
               <span v-if="mapPlaces.length"><i class="legend-dot search-result-dot"></i> Local pesquisado</span>
               <span><i class="legend-dot user-dot"></i> Posição GPS</span>
-              <small>Posição atualizada enquanto o acompanhamento estiver ativo; rota rodoviária estimada pelo OSRM.</small>
+              <small>Rota rodoviária estimada pelo OSRM.</small>
             </div>
           </div>
           <HospitalList
@@ -319,7 +309,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             :has-external-results="mapPlaces.length > 0"
             :route-loading-id="routeLoadingId"
             :nearby-active="nearbyActive"
-            v-model:distance-filter="distanceFilter"
             @select="selectHospital($event, { scroll: false })"
             @directions="showRoute"
             @toggle-all="showAllResults = !showAllResults"
