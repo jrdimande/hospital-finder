@@ -176,8 +176,13 @@ button { cursor: pointer; }
 .facility-post { background: #e29a34; }
 .facility-search { background: #2585c2; }
 .facility-dot.selected { transform: scale(1.3); outline: 2px solid #17364b; outline-offset: 1px; }
-.leaflet-popup-content .hospital-google-maps { display: inline-block; margin-top: 8px; color: var(--blue); font-weight: 700; }
-.leaflet-popup-content .hospital-google-maps:hover { color: var(--blue-dark); text-decoration: underline; }
+.leaflet-popup-content .hospital-google-maps { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; padding: 10px 12px; border-radius: 5px; background: var(--blue); color: white; font-size: 12px; font-weight: 700; text-align: center; animation: google-maps-pulse 1.4s ease-in-out infinite; }
+.leaflet-popup-content .hospital-google-maps:hover { background: var(--blue-dark); text-decoration: none; animation-play-state: paused; }
+.leaflet-popup-content .hospital-google-maps:focus-visible { outline: 3px solid #62b6d0; outline-offset: 2px; }
+@keyframes google-maps-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 #176f9f00; }
+  50% { box-shadow: 0 0 0 5px #176f9f35; }
+}
 .map-marker { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 2px solid white; color: white; box-shadow: 0 2px 7px #18394a55; font-size: 17px; font-weight: 500; }
 .hospital-marker { background: #e65d59; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); }
 .hospital-marker::first-letter { transform: rotate(45deg); }
