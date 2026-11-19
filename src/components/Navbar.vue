@@ -8,8 +8,7 @@ import BrandMark from './BrandMark.vue'
       <BrandMark />
       <div class="nav-links">
         <a href="#inicio">Início</a>
-        <a href="#/info">Info</a>
-        <a href="#contacto">Contacto</a>
+        <a href="#/info">O projeto</a>
       </div>
       <a class="nav-action" href="#encontrar">Explorar mapa <span aria-hidden="true">↗</span></a>
     </nav>
