@@ -13,39 +13,38 @@ const props = defineProps({
 
 defineEmits(['select', 'directions'])
 
-const fields = computed(() => {
-  const properties = props.hospital.properties
-  return [
-    ['Província', properties.Provincia],
-    ['Distrito', properties.Distrito],
-    ['Localidade', properties.PostoAdministrativo || properties.AreaLocalizacao],
-    ['Entidade gestora', properties.DescricaoAutoridadeGestora || properties.AutoridadeGestora],
-    ['Contacto', properties.ContactoResponsavel],
-  ].filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== '')
-})
+const locationLabel = computed(() => [...new Set([
+  props.hospital.properties.PostoAdministrativo || props.hospital.properties.AreaLocalizacao,
+  props.hospital.properties.Distrito,
+  props.hospital.properties.Provincia,
+].filter((value) => value && String(value).trim()))].join(', '))
 
-const detailFields = computed(() => Object.entries(props.hospital.properties)
-  .filter(([key, value]) => !['Nome', 'Tipo', 'Provincia', 'Distrito', 'PostoAdministrativo', 'AreaLocalizacao', 'DescricaoAutoridadeGestora', 'AutoridadeGestora', 'ContactoResponsavel', 'Latitude', 'Longitude'].includes(key) && value !== null && value !== undefined && value !== ''))
+const detailFields = computed(() => {
+  const labels = {
+    DescricaoAutoridadeGestora: 'Entidade gestora',
+    AutoridadeGestora: 'Entidade gestora',
+    ContactoResponsavel: 'Pessoa de contacto',
+    Endereco: 'Endereço',
+  }
+  return Object.entries(props.hospital.properties)
+    .filter(([key, value]) => !['Nome', 'Tipo', 'Provincia', 'Distrito', 'PostoAdministrativo', 'AreaLocalizacao', 'Latitude', 'Longitude'].includes(key) && value !== null && value !== undefined && value !== '')
+    .map(([key, value]) => [labels[key] || key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[_-]/g, ' '), value])
+})
 </script>
 
 <template>
   <article class="hospital-card" :class="{ 'is-selected': selected }">
     <div class="card-topline">
-      <span class="hospital-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M4 21V5h16v16M2 21h20M9 9h6M12 6v6M8 16h.01M16 16h.01"/></svg>
-      </span>
+      <span class="hospital-type-label">{{ hospital.type || 'Unidade sanitária' }}</span>
       <span v-if="distanceKm !== null" class="distance-pill">{{ formatDistance(distanceKm) }}</span>
     </div>
     <h3>{{ hospital.name }}</h3>
-    <p v-if="hospital.type" class="hospital-type">{{ hospital.type }}</p>
+    <p v-if="locationLabel" class="hospital-location"><span aria-hidden="true">⌖</span>{{ locationLabel }}</p>
     <p v-if="hospital.source === 'OpenStreetMap'" class="hospital-source">
-      Localização do <a :href="hospital.sourceUrl" target="_blank" rel="noreferrer">OpenStreetMap ↗</a>
+      Fonte: <a :href="hospital.sourceUrl" target="_blank" rel="noreferrer">OpenStreetMap ↗</a>
     </p>
-    <div class="hospital-fields">
-      <span v-for="[label, value] in fields" :key="label"><strong>{{ label }}:</strong> {{ value }}</span>
-    </div>
     <details v-if="detailFields.length" class="hospital-details">
-      <summary>Consultar dados disponíveis</summary>
+      <summary>Mais informações</summary>
       <dl>
         <template v-for="[key, value] in detailFields" :key="key">
           <dt>{{ key }}</dt><dd>{{ value }}</dd>
@@ -54,9 +53,9 @@ const detailFields = computed(() => Object.entries(props.hospital.properties)
     </details>
     <div class="card-actions">
       <button class="button button-outline" type="button" @click="$emit('select', hospital)">Ver no mapa <span aria-hidden="true">↗</span></button>
-      <button class="button button-directions" type="button" :disabled="routeLoading || locating" :title="hasUserLocation ? 'Traçar rota rodoviária no mapa' : 'Ativar a localização para traçar a rota'" @click="$emit('directions', hospital)">
+      <button class="button button-directions" type="button" :disabled="routeLoading || locating" :title="hasUserLocation ? 'Traçar rota rodoviária no mapa' : 'Ativar localização e traçar uma rota até esta unidade'" @click="$emit('directions', hospital)">
         <span v-if="routeLoading" class="button-spinner" aria-hidden="true"></span>
-        {{ routeLoading ? 'A traçar…' : locating && !hasUserLocation ? 'A obter localização…' : !hasUserLocation ? 'Ativar localização e traçar rota' : 'Como chegar' }} <span v-if="!routeLoading && !(locating && !hasUserLocation)" aria-hidden="true">→</span>
+        {{ routeLoading ? 'A traçar…' : locating && !hasUserLocation ? 'A obter localização…' : !hasUserLocation ? 'Ativar localização' : 'Como chegar' }} <span v-if="!routeLoading && !(locating && !hasUserLocation)" aria-hidden="true">→</span>
       </button>
     </div>
   </article>

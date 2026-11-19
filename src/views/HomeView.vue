@@ -259,12 +259,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           {{ placeSearchMessage }}
         </div>
 
-        <div class="finder-steps" aria-label="Como encontrar uma unidade e iniciar uma rota">
-          <span><i>1</i> Explore o mapa</span><b aria-hidden="true">→</b>
-          <span><i>2</i> Escolha uma unidade</span><b aria-hidden="true">→</b>
-          <span><i>3</i> Veja como chegar</span>
-        </div>
-
         <div v-if="locationError" class="notice notice-error" role="alert">
           <span aria-hidden="true">!</span><p>{{ locationError }}</p>
         </div>
@@ -279,9 +273,18 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div class="map-layout">
           <div id="mapa" class="map-panel">
             <div class="map-panel-header">
-              <div><span class="map-live-dot"></span><strong>1. Explore o mapa</strong></div>
-              <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
-              <span v-else-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }} <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
+              <div><span class="map-live-dot"></span><strong>Mapa de unidades sanitárias</strong></div>
+              <div class="map-header-actions">
+                <span v-if="tracking" class="map-total live-location-label"><span class="tracking-indicator"></span> GPS em tempo real</span>
+                <span v-else-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }} <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
+                <details class="map-help">
+                  <summary>Como funciona</summary>
+                  <div class="map-help-popover">
+                    <p>Pesquise uma unidade ou use a sua localização para ver opções próximas.</p>
+                    <p>Escolha um resultado para o destacar no mapa. Em <strong>Como chegar</strong>, calculamos a rota a partir da sua localização.</p>
+                  </div>
+                </details>
+              </div>
             </div>
             <HospitalMap
               :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"

@@ -22,7 +22,7 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'togg
   <section class="results-section" aria-labelledby="results-title">
     <div class="results-heading">
       <div>
-        <div class="section-kicker"><span></span> 2. ESCOLHA UMA UNIDADE</div>
+        <div class="section-kicker"><span></span> RESULTADOS</div>
         <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de si' : hasExternalResults ? 'Locais encontrados no mapa' : 'Unidades sanitárias' }}</h2>
         <p v-if="nearbyActive">Ordenados pela distância em linha reta</p>
         <p v-else-if="hasExternalResults">Resultados do OpenStreetMap; consulte a origem em cada cartão.</p>
