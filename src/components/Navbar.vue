@@ -7,9 +7,10 @@
       </a>
       <div class="nav-links">
         <a href="#inicio">Início</a>
-        <a href="#encontrar">Encontrar hospitais</a>
+        <a class="nav-mobile-link" href="#encontrar">Encontrar hospitais</a>
         <a href="#sobre">Sobre o projeto</a>
         <a href="#contacto">Contacto</a>
+        <a class="nav-mobile-link" href="#reclamar">Reclamar</a>
       </div>
       <a class="nav-action" href="#encontrar">Explorar mapa <span aria-hidden="true">↗</span></a>
     </nav>

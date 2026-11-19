@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import ComplaintSection from '../components/ComplaintSection.vue'
 import HeroSection from '../components/HeroSection.vue'
 import HospitalList from '../components/HospitalList.vue'
 import HospitalMap from '../components/HospitalMap.vue'
@@ -218,6 +219,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         </div>
       </div>
     </section>
+    <ComplaintSection />
   </main>
   <footer id="contacto" class="site-footer">
     <div class="page-shell footer-main">
