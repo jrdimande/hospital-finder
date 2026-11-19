@@ -60,7 +60,7 @@ function renderHospitals() {
       icon: facilityIcon(hospital.category),
       title: hospital.name,
       riseOnHover: true,
-    }).bindPopup(popupContent(hospital))
+    }).bindPopup(popupContent(hospital), { closeOnClick: false })
     marker.on('click', () => emit('select', hospital))
     marker.addTo(hospitalLayer)
     markerById.set(hospital.id, marker)
