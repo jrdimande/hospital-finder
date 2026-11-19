@@ -12,10 +12,9 @@ import { searchMapPlaces } from '../services/placeSearchService'
 import { fetchDrivingRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
 
-const { hospitals, loading, error, updatedAt, provinces, reload } = useHospitals()
+const { hospitals, loading, error, updatedAt, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
 const searchQuery = ref('')
-const selectedProvince = ref('')
 const distanceFilter = ref('all')
 const nearbyActive = ref(false)
 const selectedId = ref(null)
@@ -38,7 +37,6 @@ let rerouteTimer = null
 const searchedHospitals = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase('pt')
   return hospitals.value.filter((hospital) => {
-    const matchesProvince = !selectedProvince.value || hospital.properties.Provincia === selectedProvince.value
     const searchable = [
       hospital.name,
       hospital.type,
@@ -46,7 +44,7 @@ const searchedHospitals = computed(() => {
       hospital.properties.Distrito,
       hospital.properties.PostoAdministrativo,
     ].filter(Boolean).join(' ').toLocaleLowerCase('pt')
-    return matchesProvince && (!query || searchable.includes(query))
+    return !query || searchable.includes(query)
   })
 })
 
@@ -68,10 +66,10 @@ const matchingHospitals = computed(() => {
   return rankedHospitals.value.filter((item) => item.distanceKm !== null && item.distanceKm <= radius)
 })
 const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
-const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || selectedProvince.value || nearbyActive.value))
+const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || nearbyActive.value))
 
-watch([searchQuery, selectedProvince, distanceFilter, nearbyActive], () => { showAllResults.value = false })
-watch([searchQuery, selectedProvince], () => {
+watch([searchQuery, distanceFilter, nearbyActive], () => { showAllResults.value = false })
+watch(searchQuery, () => {
   placeSearchRequestId += 1
   mapPlaces.value = []
   placeSearchError.value = ''
@@ -93,7 +91,7 @@ async function searchPlaces() {
   const requestId = ++placeSearchRequestId
   placeSearchLoading.value = true
   try {
-    const places = await searchMapPlaces(searchQuery.value, selectedProvince.value)
+    const places = await searchMapPlaces(searchQuery.value)
     if (requestId !== placeSearchRequestId) return
     mapPlaces.value = places
     if (!mapPlaces.value.length) {
@@ -243,12 +241,10 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div class="search-heading">
           <div class="section-kicker"><span></span> PESQUISA</div>
           <h2>Encontre cuidados de saúde</h2>
-          <p>Pesquise pelo nome da unidade ou escolha uma província.</p>
+          <p>Pesquise pelo nome de um hospital, centro de saúde ou localidade.</p>
         </div>
         <SearchBar
           v-model="searchQuery"
-          v-model:province-value="selectedProvince"
-          :provinces="provinces"
           @search="searchPlaces"
         />
         <p class="search-hint">Se a unidade não estiver nos dados MozGIS, pesquisamos o local no OpenStreetMap.</p>

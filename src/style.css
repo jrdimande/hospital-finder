@@ -55,7 +55,12 @@ button { cursor: pointer; }
 .button:disabled { cursor: not-allowed; opacity: .58; }
 .button-primary { background: var(--blue); color: white; }
 .button-primary:hover:not(:disabled) { background: var(--blue-dark); box-shadow: 0 8px 18px #176f9f33; transform: translateY(-1px); }
-.hero-button { min-height: 48px; padding: 0 17px; font-size: 12px; }
+.hero-button { min-height: 52px; padding: 0 19px; font-size: 13px; box-shadow: 0 6px 16px #176f9f2b; animation: nearby-attention 2.4s ease-in-out infinite; }
+.hero-button:hover:not(:disabled), .hero-button:disabled, .hero-button.button-tracking { animation: none; }
+@keyframes nearby-attention {
+  0%, 100% { box-shadow: 0 5px 14px #176f9f28; }
+  50% { box-shadow: 0 7px 22px #176f9f62; }
+}
 .hero-button.button-tracking { background: #268260; }
 .tracking-indicator { display: inline-block; flex: none; width: 7px; height: 7px; border-radius: 50%; background: #4fc897; box-shadow: 0 0 0 3px #4fc89735; animation: tracking-pulse 1.5s ease-in-out infinite; }
 @keyframes tracking-pulse { 50% { box-shadow: 0 0 0 6px #4fc89710; } }
@@ -95,25 +100,21 @@ button { cursor: pointer; }
 .search-heading { margin-bottom: 18px; }
 .search-heading h2 { margin: 8px 0 4px; color: var(--navy); font: 750 23px/1.25 Manrope, sans-serif; letter-spacing: -.65px; }
 .search-heading p { margin: 0; color: #718394; font-size: 13px; }
-.search-bar { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(210px, 270px) auto; gap: 8px; min-height: 82px; border: 1px solid #e4ebef; border-radius: 12px; background: white; align-items: stretch; padding: 10px; box-shadow: 0 9px 25px #25465e08; }
+.search-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-height: 82px; border: 1px solid #e4ebef; border-radius: 12px; background: white; align-items: stretch; padding: 10px; box-shadow: 0 9px 25px #25465e08; }
 .search-hint { margin: 7px 3px 0; color: #718594; font-size: 11px; }
 .place-search-status { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 12px 14px; border: 1px solid #dce9ed; border-radius: 8px; background: #fff; color: #526f80; font-size: 12px; line-height: 1.5; }
 .place-search-status .loading-spinner { width: 18px; height: 18px; flex: none; }
-.search-input-wrap, .province-select { display: flex; align-items: center; position: relative; height: 60px; padding: 19px 13px 0; border: 1px solid #e8edef; border-radius: 8px; background: #fff; }
+.search-input-wrap { display: flex; align-items: center; position: relative; height: 60px; padding: 19px 13px 0; border: 1px solid #e8edef; border-radius: 8px; background: #fff; }
 .search-input-wrap { min-width: 0; }
 .field-label { position: absolute; top: 7px; left: 13px; color: #6f8492; font-size: 11px; line-height: 1.2; font-weight: 700; letter-spacing: .1px; }
-.search-input-wrap svg, .province-select svg { flex: none; width: 16px; height: 16px; fill: none; stroke: #91a1ad; stroke-width: 1.7; }
+.search-input-wrap svg { flex: none; width: 16px; height: 16px; fill: none; stroke: #91a1ad; stroke-width: 1.7; }
 .search-input-wrap input { border: 0; outline: 0; width: 100%; min-width: 0; padding: 0 0 0 10px; color: #344c5e; font-size: 14px; background: transparent; }
 .search-input-wrap input::placeholder { color: #a0adb7; }
-.province-select { gap: 9px; }
-.province-select select { width: 100%; appearance: none; border: 0; outline: 0; background: transparent; color: #526b7b; font-size: 13px; cursor: pointer; }
-.select-chevron { color: #8999a4; font-size: 16px; pointer-events: none; }
 .search-button { min-height: 60px; padding: 0 22px; background: #e9f4f8; color: var(--blue); font-size: 13px; white-space: nowrap; }
 .search-button:hover { background: #dceef4; }
 .search-button > span:last-child { font-size: 16px; }
 .search-input-wrap input { font-size: 15px; line-height: 1.35; }
 .search-input-wrap input::placeholder { font-size: 13px; }
-.province-select select { font-size: 14px; }
 .search-button { font-size: 13px; }
 .notice { display: flex; gap: 11px; align-items: flex-start; margin-top: 17px; padding: 13px 15px; border-radius: 8px; font-size: 12px; line-height: 1.55; }
 .notice > span { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-weight: 700; }
@@ -204,7 +205,7 @@ button { cursor: pointer; }
 .show-all-button { width: 100%; min-height: 40px; margin: 0 0 12px; border: 1px solid #dce9ed; border-radius: 7px; background: #f7fbfc; color: var(--blue); font-size: 11px; font-weight: 700; }
 .show-all-button:hover { border-color: #a8cbd3; background: #edf7f8; }
 .show-all-button span { margin-left: 5px; }
-.button:focus-visible, .show-all-button:focus-visible, .route-clear:focus-visible, .map-recenter:focus-visible, .search-input-wrap:focus-within, .province-select:focus-within, .radius-filter select:focus-visible, a:focus-visible { outline: 3px solid #62b6d0; outline-offset: 2px; }
+.button:focus-visible, .show-all-button:focus-visible, .route-clear:focus-visible, .map-recenter:focus-visible, .search-input-wrap:focus-within, .radius-filter select:focus-visible, a:focus-visible { outline: 3px solid #62b6d0; outline-offset: 2px; }
 .hospital-card { padding: 15px; }
 .hospital-card h3 { margin: 11px 0 5px; color: #2b4659; font-size: 15px; font-weight: 650; line-height: 1.4; }
 .hospital-location { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: #6c808d; font-size: 12px; line-height: 1.45; }
@@ -224,7 +225,7 @@ button { cursor: pointer; }
 .hero-stats strong { font-size: 12px; }
 .hero-stats small, .hero-note { font-size: 10px; }
 .search-input-wrap input { font-size: 15px; }
-.province-select select, .search-button { font-size: 13px; }
+.search-button { font-size: 13px; }
 .map-panel-header strong { font-size: 13px; }
 .map-total { font-size: 11px; }
 .route-summary-text strong { font-size: 12px; }
@@ -314,7 +315,7 @@ button { cursor: pointer; }
   .hero-copy { padding-bottom: 18px; }
   .hero h1 { font-size: clamp(37px, 10vw, 47px); letter-spacing: -1.4px; margin-top: 17px; }
   .hero-copy > p { font-size: 12px; }
-  .hero-button { width: 100%; font-size: 11px; }
+  .hero-button { width: 100%; font-size: 12px; }
   .hero-note { font-size: 9px; }
   .hero-art { height: 220px; margin: 4px 0 0; border-radius: 80px 80px 10px 10px; }
   .art-cross { width: 71px; height: 71px; border-radius: 22px; }
@@ -328,14 +329,10 @@ button { cursor: pointer; }
   .hero-stats small { font-size: 9px; }
   .finder-section { padding: 40px 0 48px; }
   .search-heading h2 { font-size: 21px; }
-  .search-bar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding: 9px; }
-  .search-input-wrap { grid-column: 1 / -1; }
-  .province-select { min-width: 0; padding-inline: 9px; }
-  .province-select .field-label { left: 9px; }
+  .search-bar { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 9px; }
   .search-input-wrap input { font-size: 14px; }
   .search-input-wrap input::placeholder { font-size: 12px; }
-  .province-select select { font-size: 12px; }
-  .search-button { min-width: 0; padding-inline: 10px; font-size: 12px; }
+  .search-button { min-width: 0; min-height: 46px; padding-inline: 10px; font-size: 12px; }
   .map-layout { gap: 13px; margin-top: 17px; }
   .leaflet-map { height: min(68svh, 560px); min-height: 300px; }
   .route-summary { padding: 9px 10px; gap: 8px; }
