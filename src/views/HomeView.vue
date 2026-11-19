@@ -12,7 +12,7 @@ import { searchMapPlaces } from '../services/placeSearchService'
 import { fetchDrivingRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
 
-const { hospitals, loading, error, updatedAt, reload } = useHospitals()
+const { hospitals, loading, error, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
 const searchQuery = ref('')
 const nearbyActive = ref(false)
@@ -274,7 +274,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>Mapa de unidades sanitárias</strong></div>
               <div class="map-header-actions">
-                <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }} <template v-if="updatedAt">· dados de {{ new Date(updatedAt).toLocaleString('pt-MZ') }}</template></span>
+                <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }}</span>
               </div>
             </div>
             <HospitalMap
