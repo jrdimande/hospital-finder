@@ -20,7 +20,6 @@ let userLayer
 let routeLayer
 let userAccuracyCircle
 let userMarker
-let markerRenderer
 let markerById = new Map()
 let hasFittedInitialBounds = false
 
@@ -34,29 +33,35 @@ function icon(className, symbol) {
   })
 }
 
+function facilityIcon(category, selected = false) {
+  const typeClass = category === 'Hospital'
+    ? 'facility-hospital'
+    : category === 'Centro de Saúde'
+      ? 'facility-center'
+      : category === 'MapSearch'
+        ? 'facility-search'
+        : 'facility-post'
+  return L.divIcon({
+    className: 'facility-map-icon',
+    html: `<span class="facility-dot ${typeClass}${selected ? ' selected' : ''}"></span>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10],
+  })
+}
+
 function renderHospitals() {
   if (!map || !hospitalLayer) return
   hospitalLayer.clearLayers()
   markerById = new Map()
 
   props.hospitals.forEach((hospital) => {
-    const marker = L.circleMarker([hospital.latitude, hospital.longitude], {
-      renderer: markerRenderer,
-      radius: 5,
-      color: '#ffffff',
-      weight: 1.5,
-      fillColor: markerColor(hospital.category),
-      fillOpacity: 0.94,
-      bubblingMouseEvents: false,
+    const marker = L.marker([hospital.latitude, hospital.longitude], {
+      icon: facilityIcon(hospital.category),
+      title: hospital.name,
+      riseOnHover: true,
     }).bindPopup(popupContent(hospital))
-    // Leaflet adds its own click handler for bound popups; replace it so the
-    // same marker explicitly toggles its information on each tap.
-    marker.off('click')
-    marker.on('click', () => {
-      emit('select', hospital)
-      if (marker.isPopupOpen()) marker.closePopup()
-      else marker.openPopup()
-    })
+    marker.on('click', () => emit('select', hospital))
     marker.addTo(hospitalLayer)
     markerById.set(hospital.id, marker)
   })
@@ -67,13 +72,6 @@ function renderHospitals() {
     map.fitBounds(points, { padding: [42, 42], maxZoom: 7 })
     hasFittedInitialBounds = true
   }
-}
-
-function markerColor(category) {
-  if (category === 'MapSearch') return '#2585c2'
-  if (category === 'Hospital') return '#df514d'
-  if (category === 'Centro de Saúde') return '#279b76'
-  return '#e29a34'
 }
 
 function popupContent(hospital) {
@@ -99,13 +97,7 @@ function updateSelectedMarker() {
   markerById.forEach((marker, id) => {
     const selected = id === props.selectedId
     const hospital = props.hospitals.find((item) => item.id === id)
-    marker.setStyle({
-      radius: selected ? 9 : 5,
-      color: selected ? '#17364b' : '#ffffff',
-      weight: selected ? 3 : 1.5,
-      fillColor: markerColor(hospital?.category),
-      fillOpacity: 0.98,
-    })
+    marker.setIcon(facilityIcon(hospital?.category, selected))
   })
 }
 
@@ -175,7 +167,6 @@ onMounted(() => {
   hospitalLayer = L.layerGroup().addTo(map)
   userLayer = L.layerGroup().addTo(map)
   routeLayer = L.layerGroup().addTo(map)
-  markerRenderer = L.canvas({ padding: 0.5 })
   renderHospitals()
   const resizeObserver = new ResizeObserver(() => map?.invalidateSize({ pan: false }))
   resizeObserver.observe(mapElement.value)
