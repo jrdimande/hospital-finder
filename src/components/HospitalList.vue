@@ -24,7 +24,7 @@ const emit = defineEmits(['select', 'directions', 'toggle-all', 'retry-location'
         <div class="section-kicker"><span></span> RESULTADOS</div>
         <h2 id="results-title">{{ nearbyActive ? 'Unidades próximas de si' : hasExternalResults ? 'Locais encontrados no mapa' : 'Unidades sanitárias' }}</h2>
         <p v-if="nearbyActive">Unidades mais próximas, ordenadas por distância</p>
-        <p v-else-if="hasExternalResults">Resultados do OpenStreetMap; consulte a origem em cada cartão.</p>
+        <p v-else-if="hasExternalResults">Locais encontrados pela pesquisa</p>
         <p v-else>Unidades disponíveis nos dados do MozGIS</p>
       </div>
       <span v-if="totalCount" class="result-count">{{ totalCount }} {{ nearbyActive ? totalCount === 1 ? 'local próximo' : 'locais próximos' : hasExternalResults ? totalCount === 1 ? 'local' : 'locais' : totalCount === 1 ? 'unidade' : 'unidades' }}</span>

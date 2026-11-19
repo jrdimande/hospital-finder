@@ -50,7 +50,7 @@ const formattedUpdate = computed(() => updatedAt.value
           <article class="info-card">
             <span class="info-card-icon green">↗</span>
             <h3>Mapa, pesquisa e rotas</h3>
-            <p>O mapa e a pesquisa de locais usam OpenStreetMap. As rotas a pé usam o perfil pedonal OSRM; carro e mota usam o perfil rodoviário.</p>
+            <p>A pesquisa por localidade também pode mostrar locais do OpenStreetMap, que não fazem necessariamente parte do cadastro de unidades sanitárias do MozGIS. As rotas a pé usam o perfil pedonal OSRM; carro e mota usam o perfil rodoviário.</p>
             <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Créditos OpenStreetMap ↗</a>
           </article>
           <article class="info-card">

@@ -260,8 +260,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           v-model="searchQuery"
           @search="searchPlaces"
         />
-        <p class="search-hint">Se a unidade não estiver nos dados MozGIS, pesquisamos o local no OpenStreetMap.</p>
-
         <div v-if="placeSearchLoading" class="place-search-status" role="status">
           <span class="loading-spinner" aria-hidden="true"></span>
           A procurar o local no mapa…

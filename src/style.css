@@ -167,12 +167,12 @@ button { cursor: pointer; }
 .results-heading h2 { margin: 7px 0 3px; color: var(--navy); letter-spacing: -.45px; font-size: 17px; }
 .results-heading p { margin: 0; color: #8998a4; font-size: 9px; }
 .result-count { color: #78909f; white-space: nowrap; font-size: 9px; padding-bottom: 3px; }
-.hospital-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-height: none; overflow: visible; padding: 1px 3px 4px 0; }
-.hospital-card { display: flex; flex-direction: column; min-height: 185px; border: 1px solid #e8eef1; border-radius: 9px; padding: 15px; transition: border-color .2s, background .2s, box-shadow .2s; }
-.hospital-card:hover, .hospital-card.is-selected { border-color: #a8d1d8; background: #fcfefe; box-shadow: 0 4px 13px #176f9f0c; }
+.hospital-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-height: none; overflow: visible; padding: 1px 3px 4px 0; }
+.hospital-card { display: flex; flex-direction: column; min-height: 185px; border: 0; border-top: 2px solid #9db5a9; border-bottom: 1px solid #e0e7e2; border-radius: 0; background: #fff; padding: 15px; transition: border-color .18s ease, background .18s ease; }
+.hospital-card:hover { border-top-color: #477b68; background: #f9fbf9; }
 .card-topline { display: flex; align-items: center; justify-content: space-between; }
 .hospital-type-label { overflow: hidden; color: #69808d; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.distance-pill { border-radius: 30px; padding: 5px 9px; background: #eaf6f0; color: #2d8e6d; font-size: 9px; font-weight: 700; }
+.distance-pill { border-radius: 2px; padding: 4px 7px; background: #f0f4f1; color: #456b59; font-size: 9px; font-weight: 650; }
 .hospital-card h3 { margin: 9px 0 2px; color: #2b4659; font-size: 12px; font-weight: 700; }
 .hospital-details { margin-top: 8px; color: #6b8190; font-size: 9px; }
 .hospital-details summary { cursor: pointer; color: var(--blue); font-weight: 600; }
@@ -193,7 +193,6 @@ button { cursor: pointer; }
 .hospital-card h3 { margin: 11px 0 5px; color: #2b4659; font-size: 15px; font-weight: 650; line-height: 1.4; }
 .hospital-location { display: flex; align-items: flex-start; gap: 6px; margin: 0; color: #6c808d; font-size: 12px; line-height: 1.45; }
 .hospital-location span { flex: none; color: #8498a4; }
-.hospital-source { margin: 8px 0 0; color: #84939c; font-size: 10px; }
 .hospital-details { margin-top: 8px; color: #6b8190; font-size: 11px; }
 .hospital-details summary { min-height: 32px; color: #657d8b; }
 .card-actions { margin-top: auto; padding-top: 13px; }
@@ -220,14 +219,12 @@ button { cursor: pointer; }
 .results-heading .section-kicker { font-size: 9px; }
 .results-heading h2 { font-size: 19px; }
 .results-heading p, .result-count { font-size: 11px; }
-.hospital-card { transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease; }
-.hospital-card:hover { transform: translateY(-2px); border-color: #90bfca; box-shadow: 0 8px 20px #17364b12; }
-.hospital-card.is-selected { border-color: #4e9bad; background: #f1fafb; box-shadow: inset 3px 0 #2587a1, 0 5px 16px #176f9f12; }
+.hospital-card.is-selected { border-top-color: var(--blue); border-bottom-color: #a7c8c4; background: #f5f9f7; }
 .hospital-card h3 { font-size: 15px; }
 .distance-pill { font-size: 10px; }
 .hospital-details { font-size: 11px; }
 .hospital-details summary { min-height: 34px; display: flex; align-items: center; }
-.card-actions .button { min-height: 42px; font-size: 11px; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.card-actions .button { min-height: 42px; border-radius: 4px; font-size: 11px; transition: background .18s ease, border-color .18s ease; }
 .button:hover:not(:disabled), .show-all-button:hover, .route-clear:hover, .map-recenter:hover { transform: translateY(-1px); }
 .button:active:not(:disabled), .show-all-button:active, .route-clear:active, .map-recenter:active { transform: translateY(0) scale(.98); }
 .empty-state strong { font-size: 13px; }

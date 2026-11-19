@@ -40,9 +40,6 @@ const detailFields = computed(() => {
     </div>
     <h3>{{ hospital.name }}</h3>
     <p v-if="locationLabel" class="hospital-location"><span aria-hidden="true">⌖</span>{{ locationLabel }}</p>
-    <p v-if="hospital.source === 'OpenStreetMap'" class="hospital-source">
-      Fonte: <a :href="hospital.sourceUrl" target="_blank" rel="noreferrer">OpenStreetMap ↗</a>
-    </p>
     <details v-if="detailFields.length" class="hospital-details">
       <summary>Mais informações</summary>
       <dl>
