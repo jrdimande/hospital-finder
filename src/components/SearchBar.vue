@@ -24,6 +24,6 @@ const emit = defineEmits(['update:modelValue', 'update:provinceValue', 'search']
       </select>
       <span class="select-chevron" aria-hidden="true">⌄</span>
     </label>
-    <button class="button search-button" type="submit"><span>Pesquisar unidades</span><span aria-hidden="true">→</span></button>
+    <button class="button search-button" type="submit"><span>Pesquisar</span><span aria-hidden="true">→</span></button>
   </form>
 </template>
