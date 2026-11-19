@@ -193,8 +193,10 @@ button { cursor: pointer; }
 .hospital-details dl { display: grid; grid-template-columns: minmax(95px,.55fr) 1fr; gap: 5px 10px; max-height: 190px; overflow: auto; margin: 8px 0 0; }
 .hospital-details dt { font-weight: 600; overflow-wrap: anywhere; }
 .hospital-details dd { margin: 0; overflow-wrap: anywhere; }
-.card-actions { display: flex; gap: 7px; margin-top: 11px; }
-.card-actions .button { flex: 1; min-height: 31px; font-size: 9px; }
+.card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 11px; }
+.card-actions .button { width: 100%; min-width: 0; min-height: 31px; font-size: 9px; }
+.card-google-maps { grid-column: 1 / -1; display: inline-flex; align-items: center; justify-self: start; gap: 5px; padding-top: 3px; color: var(--blue); font-size: 11px; font-weight: 650; }
+.card-google-maps:hover { text-decoration: underline; }
 .button-outline { border: 1px solid #dce7eb; color: #537183; background: white; }
 .button-outline:hover { border-color: #90b8c5; background: #f6fbfc; }
 .button-directions { color: white; background: var(--green); }

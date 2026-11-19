@@ -357,6 +357,8 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           </div>
           <HospitalList
             :hospitals="visibleHospitals"
+            :user-location="location"
+            :route-mode="routeMode"
             :total-count="matchingHospitals.length"
             :showing-all="showAllResults"
             :selected-id="selectedId"

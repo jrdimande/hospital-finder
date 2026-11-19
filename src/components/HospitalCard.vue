@@ -5,6 +5,8 @@ import { formatDistance } from '../utils/distance'
 const props = defineProps({
   hospital: { type: Object, required: true },
   distanceKm: { type: Number, default: null },
+  userLocation: { type: Object, default: null },
+  routeMode: { type: String, default: 'car' },
   selected: { type: Boolean, default: false },
   hasUserLocation: { type: Boolean, default: false },
   locating: { type: Boolean, default: false },
@@ -18,6 +20,18 @@ const locationLabel = computed(() => [...new Set([
   props.hospital.properties.Distrito,
   props.hospital.properties.Provincia,
 ].filter((value) => value && String(value).trim()))].join(', '))
+
+const googleMapsUrl = computed(() => {
+  const url = new URL('https://www.google.com/maps/dir/')
+  url.searchParams.set('api', '1')
+  url.searchParams.set('destination', `${props.hospital.latitude},${props.hospital.longitude}`)
+  if (props.userLocation) {
+    url.searchParams.set('origin', `${props.userLocation.latitude},${props.userLocation.longitude}`)
+  }
+  url.searchParams.set('travelmode', props.routeMode === 'pedestrian' ? 'walking' : 'driving')
+  url.searchParams.set('dir_action', 'navigate')
+  return url.toString()
+})
 
 const detailFields = computed(() => {
   const labels = {
@@ -54,6 +68,9 @@ const detailFields = computed(() => {
         <span v-if="routeLoading" class="button-spinner" aria-hidden="true"></span>
         {{ routeLoading ? 'A traçar…' : locating && !hasUserLocation ? 'A obter localização…' : !hasUserLocation ? 'Ativar localização' : 'Como chegar' }} <span v-if="!routeLoading && !(locating && !hasUserLocation)" aria-hidden="true">→</span>
       </button>
+      <a class="card-google-maps" :href="googleMapsUrl" :aria-label="`Navegar até ${hospital.name} no Google Maps`" target="_blank" rel="noreferrer">
+        Navegar no Google Maps <span aria-hidden="true">↗</span>
+      </a>
     </div>
   </article>
 </template>

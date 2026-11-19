@@ -3,6 +3,8 @@ import HospitalCard from './HospitalCard.vue'
 
 defineProps({
   hospitals: { type: Array, default: () => [] },
+  userLocation: { type: Object, default: null },
+  routeMode: { type: String, default: 'car' },
   totalCount: { type: Number, default: 0 },
   showingAll: { type: Boolean, default: false },
   selectedId: { type: [String, Number], default: null },
@@ -42,6 +44,8 @@ const emit = defineEmits(['select', 'directions', 'toggle-all', 'retry-location'
         :key="item.hospital.id"
         :hospital="item.hospital"
         :distance-km="item.distanceKm"
+        :user-location="userLocation"
+        :route-mode="routeMode"
         :selected="selectedId === item.hospital.id"
         :has-user-location="hasUserLocation"
         :locating="locating"
