@@ -5,6 +5,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 const props = defineProps({
   hospitals: { type: Array, default: () => [] },
   userLocation: { type: Object, default: null },
+  routeMode: { type: String, default: 'car' },
   selectedId: { type: [String, Number], default: null },
   route: { type: Object, default: null },
   routeLoading: { type: Boolean, default: false },
@@ -61,7 +62,7 @@ function renderHospitals() {
       icon: facilityIcon(hospital.category),
       title: hospital.name,
       riseOnHover: true,
-    }).bindPopup(popupContent(hospital), { closeOnClick: false, closeOnEscapeKey: false })
+    }).bindPopup(() => popupContent(hospital), { closeOnClick: false, closeOnEscapeKey: false })
     marker.on('click', () => emit('select', hospital))
     marker.addTo(hospitalLayer)
     markerById.set(hospital.id, marker)
@@ -87,7 +88,19 @@ function popupContent(hospital) {
     ['Contacto', hospital.properties.ContactoResponsavel],
   ].filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== '')
 
-  return `<strong>${escapeHtml(hospital.name)}</strong>${details.map(([label, value]) => `<br><span>${escapeHtml(label)}: ${escapeHtml(value)}</span>`).join('')}`
+  return `<strong>${escapeHtml(hospital.name)}</strong>${details.map(([label, value]) => `<br><span>${escapeHtml(label)}: ${escapeHtml(value)}</span>`).join('')}<br><a class="hospital-google-maps" href="${escapeHtml(googleMapsUrl(hospital))}" target="_blank" rel="noopener noreferrer">Navegar no Google Maps ↗</a>`
+}
+
+function googleMapsUrl(hospital) {
+  const url = new URL('https://www.google.com/maps/dir/')
+  url.searchParams.set('api', '1')
+  url.searchParams.set('destination', `${hospital.latitude},${hospital.longitude}`)
+  if (props.userLocation) {
+    url.searchParams.set('origin', `${props.userLocation.latitude},${props.userLocation.longitude}`)
+  }
+  url.searchParams.set('travelmode', props.routeMode === 'pedestrian' ? 'walking' : 'driving')
+  url.searchParams.set('dir_action', 'navigate')
+  return url.toString()
 }
 
 function escapeHtml(value) {

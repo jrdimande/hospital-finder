@@ -338,6 +338,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             <HospitalMap
               :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"
               :user-location="location"
+              :route-mode="routeMode"
               :selected-id="selectedId"
               :route="route"
               :route-loading="Boolean(routeLoadingId)"
