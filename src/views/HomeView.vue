@@ -9,7 +9,6 @@ import SearchBar from '../components/SearchBar.vue'
 import { useGeolocation } from '../composables/useGeolocation'
 import { useHospitals } from '../composables/useHospitals'
 import { searchMapPlaces } from '../services/placeSearchService'
-import { findNearbyPharmacies } from '../services/pharmacyService'
 import { fetchRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
 
@@ -24,11 +23,6 @@ const pendingRouteScroll = ref(false)
 const autoRoutePending = ref(false)
 const automaticRouteQueue = ref([])
 const mapPlaces = ref([])
-const pharmacyPlaces = ref([])
-const pharmacySearchLoading = ref(false)
-const pharmacySearchDone = ref(false)
-const pharmacySearchError = ref('')
-const nearestPharmacyRoutePending = ref(false)
 const placeSearchLoading = ref(false)
 const placeSearchError = ref('')
 const placeSearchMessage = ref('')
@@ -39,8 +33,6 @@ const routeError = ref('')
 const routeLoadingId = ref(null)
 let routeRequestId = 0
 let rerouteTimer = null
-let pharmacySearchCenter = null
-let pharmacyRequestId = 0
 
 const searchedHospitals = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase('pt')
@@ -59,7 +51,6 @@ const searchedHospitals = computed(() => {
 const rankedHospitals = computed(() => [
   ...searchedHospitals.value,
   ...mapPlaces.value,
-  ...(nearbyActive.value ? pharmacyPlaces.value : []),
 ].map((hospital) => ({
     hospital,
     distanceKm: location.value ? haversineDistanceKm(location.value, hospital) : null,
@@ -76,78 +67,14 @@ const matchingHospitals = computed(() => {
 const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
 const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || nearbyActive.value))
 
-async function loadNearbyPharmacies(currentLocation) {
-  if (pharmacySearchCenter && haversineDistanceKm(pharmacySearchCenter, currentLocation) < 5) return
-  pharmacySearchCenter = currentLocation
-  const requestId = ++pharmacyRequestId
-  pharmacySearchLoading.value = true
-  pharmacySearchDone.value = false
-  pharmacySearchError.value = ''
-  pharmacyPlaces.value = []
-
-  try {
-    const results = await findNearbyPharmacies(currentLocation)
-    if (requestId !== pharmacyRequestId) return
-    pharmacyPlaces.value = results
-    pharmacySearchDone.value = true
-    routeToNearestPharmacy(results)
-  } catch (cause) {
-    if (requestId === pharmacyRequestId) {
-      pharmacySearchError.value = cause instanceof Error ? cause.message : 'Não foi possível procurar farmácias próximas.'
-    }
-  } finally {
-    if (requestId === pharmacyRequestId) pharmacySearchLoading.value = false
-  }
-}
-
-function retryPharmacySearch() {
-  pharmacySearchCenter = null
-  if (location.value) loadNearbyPharmacies(location.value)
-}
-
-function routeToNearestPharmacy(results = pharmacyPlaces.value) {
-  if (!nearestPharmacyRoutePending.value) return
-  nearestPharmacyRoutePending.value = false
-  const nearestPharmacy = [...results]
-    .sort((a, b) => haversineDistanceKm(location.value, a) - haversineDistanceKm(location.value, b))[0]
-  if (nearestPharmacy) showRoute(nearestPharmacy, { scroll: false })
-}
-
-function findNearestPharmacy() {
-  clearRoute()
-  nearbyActive.value = true
-  showAllResults.value = false
-  autoRoutePending.value = false
-  nearestPharmacyRoutePending.value = true
-
-  if (location.value && pharmacySearchDone.value) {
-    routeToNearestPharmacy()
-  } else if (location.value && !pharmacySearchLoading.value) {
-    pharmacySearchCenter = null
-    loadNearbyPharmacies(location.value)
-  } else if (!location.value) {
-    locate()
-  }
-
-  requestAnimationFrame(() => {
-    document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  })
-}
-
-function isNearestPharmacyQuery(query) {
-  const normalized = query.trim().toLocaleLowerCase('pt').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  return /^(farmacia|farmacias|farmacia proxima|farmacia mais proxima|farmacia proxima de mim|farmacia mais proxima de mim|farmacia perto de mim|farmacias proximas|farmacias mais proximas|farmacias perto de mim)$/.test(normalized)
-}
-
 watch(routeMode, () => {
   if (!route.value) return
-  const destination = [...hospitals.value, ...mapPlaces.value, ...pharmacyPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
+  const destination = [...hospitals.value, ...mapPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
   if (destination) showRoute(destination, { scroll: false })
 })
 
 watch([searchQuery, nearbyActive], () => { showAllResults.value = false })
 watch(searchQuery, () => {
-  nearestPharmacyRoutePending.value = false
   placeSearchRequestId += 1
   mapPlaces.value = []
   placeSearchError.value = ''
@@ -158,10 +85,6 @@ watch(searchQuery, () => {
 })
 
 async function searchPlaces() {
-  if (isNearestPharmacyQuery(searchQuery.value)) {
-    findNearestPharmacy()
-    return
-  }
   clearRoute()
   selectedId.value = null
   nearbyActive.value = false
@@ -286,12 +209,11 @@ function clearRoute() {
 }
 
 function retryRoute() {
-  const hospital = [...hospitals.value, ...mapPlaces.value, ...pharmacyPlaces.value].find((item) => item.id === selectedId.value)
+  const hospital = [...hospitals.value, ...mapPlaces.value].find((item) => item.id === selectedId.value)
   if (hospital) showRoute(hospital)
 }
 
 watch(location, (currentLocation) => {
-  if (currentLocation) loadNearbyPharmacies(currentLocation)
   if (pendingRouteHospital.value && currentLocation) {
     const destination = pendingRouteHospital.value
     const shouldScrollToRoute = pendingRouteScroll.value
@@ -313,7 +235,7 @@ watch(location, (currentLocation) => {
 
   clearTimeout(rerouteTimer)
   rerouteTimer = setTimeout(() => {
-    const destination = [...hospitals.value, ...mapPlaces.value, ...pharmacyPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
+    const destination = [...hospitals.value, ...mapPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
     if (destination) showRoute(destination, { scroll: false })
   }, 1200)
 })
@@ -331,17 +253,12 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div class="search-heading">
           <div class="section-kicker"><span></span> PESQUISA</div>
           <h2>Encontre cuidados de saúde</h2>
-          <p>Pesquise uma unidade pelo nome ou procure a farmácia mais próxima e trace a rota automaticamente.</p>
+          <p>Pesquise pelo nome de um hospital, centro de saúde ou localidade.</p>
         </div>
         <SearchBar
           v-model="searchQuery"
           @search="searchPlaces"
         />
-        <button class="nearby-pharmacy-action" type="button" :disabled="pharmacySearchLoading || locating" @click="findNearestPharmacy">
-          <span class="pharmacy-action-icon" aria-hidden="true">+</span>
-          <span class="pharmacy-action-copy"><strong>{{ locating ? 'A obter localização…' : pharmacySearchLoading ? 'A procurar farmácia…' : 'Encontrar farmácia mais próxima' }}</strong><small>Usa a sua localização e traça a rota automaticamente.</small></span>
-          <span class="pharmacy-action-arrow" aria-hidden="true">→</span>
-        </button>
         <p class="search-hint">Se a unidade não estiver nos dados MozGIS, pesquisamos o local no OpenStreetMap.</p>
 
         <div v-if="placeSearchLoading" class="place-search-status" role="status">
@@ -369,7 +286,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <div class="map-layout">
           <div id="mapa" class="map-panel">
             <div class="map-panel-header">
-              <div><span class="map-live-dot"></span><strong>Mapa de unidades e farmácias</strong></div>
+              <div><span class="map-live-dot"></span><strong>Mapa de unidades sanitárias</strong></div>
               <div class="map-header-actions">
                 <label class="route-mode-control">
                   <span>Trajeto</span>
@@ -379,7 +296,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
                     <option value="motorcycle">Mota</option>
                   </select>
                 </label>
-                <span v-if="hospitals.length || mapPlaces.length || pharmacyPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }}</span>
+                <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }}</span>
               </div>
             </div>
             <HospitalMap
@@ -398,7 +315,6 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
               <span><i class="legend-dot hospital-dot"></i> Hospital</span>
               <span><i class="legend-dot center-dot"></i> Centro de saúde</span>
               <span><i class="legend-dot post-dot"></i> Posto de saúde</span>
-              <span v-if="pharmacyPlaces.length"><i class="legend-dot pharmacy-dot"></i> Farmácia</span>
               <span v-if="mapPlaces.length"><i class="legend-dot search-result-dot"></i> Local pesquisado</span>
               <span><i class="legend-dot user-dot"></i> Posição GPS</span>
               <small>Rotas: <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noreferrer">OSRM/FOSSGIS</a> · dados OSM (<a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">corrigir mapa</a>)</small>
@@ -413,17 +329,12 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             :locating="locating"
             :location-error="locationError"
             :has-external-results="mapPlaces.length > 0"
-            :pharmacies-loading="pharmacySearchLoading"
-            :pharmacies-error="pharmacySearchError"
-            :pharmacy-search-done="pharmacySearchDone"
-            :has-pharmacies="pharmacyPlaces.length > 0"
             :route-loading-id="routeLoadingId"
             :nearby-active="nearbyActive"
             @select="selectHospital($event, { scroll: false })"
             @directions="showRoute"
             @toggle-all="showAllResults = !showAllResults"
             @retry-location="findNearby"
-            @retry-pharmacies="retryPharmacySearch"
           />
         </div>
       </div>

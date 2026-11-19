@@ -64,7 +64,6 @@ function renderHospitals() {
 
 function markerColor(category) {
   if (category === 'MapSearch') return '#2585c2'
-  if (category === 'Pharmacy') return '#5982a7'
   if (category === 'Hospital') return '#df514d'
   if (category === 'Centro de Saúde') return '#279b76'
   return '#e29a34'
