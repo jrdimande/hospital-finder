@@ -73,12 +73,12 @@ const formattedUpdate = computed(() => updatedAt.value
     <div class="page-shell footer-main">
       <div class="footer-brand">
         <BrandMark />
-        <p>Mais perto dos cuidados de saúde em Moçambique.</p>
+        <p>Um mapa para encontrar hospitais, centros e postos de saúde em Moçambique.</p>
       </div>
-      <div class="footer-column"><strong>Explorar</strong><a href="#inicio">Início</a><a href="#encontrar">Encontrar hospitais</a></div>
-      <div class="footer-column"><strong>Fontes</strong><a href="https://www.mozgis.gov.mz/" target="_blank" rel="noreferrer">Dados: MozGIS ↗</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapa: OpenStreetMap ↗</a></div>
-      <div class="footer-column"><strong>Contacto</strong><span>Contacto do projeto não disponibilizado.</span><span>Projeto informativo</span></div>
+      <div class="footer-column"><strong>Explorar</strong><a href="#inicio">Início</a><a href="#encontrar">Encontrar unidades</a></div>
+      <div class="footer-column"><strong>Fontes dos dados</strong><a href="https://www.mozgis.gov.mz/" target="_blank" rel="noreferrer">Unidades sanitárias: MozGIS ↗</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapa e locais: OpenStreetMap ↗</a></div>
+      <div class="footer-column"><strong>Sobre o projeto</strong><a href="#/info">Como funciona e fontes</a><span>Projeto informativo, sem vínculo de emergência.</span></div>
     </div>
-    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde Perto</span><span>Confirme a informação diretamente junto da unidade sanitária.</span></div>
+    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde Perto</span><span>Confirme horários e serviços diretamente com a unidade.</span></div>
   </footer>
 </template>
