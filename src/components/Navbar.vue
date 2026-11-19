@@ -36,6 +36,7 @@ onBeforeUnmount(() => {
           <a href="#inicio" @click="menuOpen = false">Início</a>
           <a href="#encontrar" @click="menuOpen = false">Encontrar unidades</a>
           <a href="#/info" @click="menuOpen = false">Informações do projeto</a>
+          <a href="#reclamar" @click="menuOpen = false">Reclamar</a>
         </nav>
       </div>
       <a class="nav-action" href="#encontrar">Explorar mapa <span aria-hidden="true">↗</span></a>
