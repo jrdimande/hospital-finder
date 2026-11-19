@@ -196,6 +196,7 @@ watch(() => props.selectedId, (selectedId) => {
     } else {
       map.panTo(marker.getLatLng())
     }
+    marker.openPopup()
   }
 })
 
