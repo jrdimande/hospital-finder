@@ -12,7 +12,7 @@ defineEmits(['locate'])
   <section id="inicio" class="hero page-shell">
     <div class="hero-copy">
       <h1>Encontre uma unidade sanitária <span>perto de si.</span></h1>
-      <p>Descubra hospitais, centros e postos de saúde em Moçambique, veja a sua posição atual e encontre o melhor caminho.</p>
+      <p>Descubra hospitais, centros, postos de saúde e farmácias em Moçambique, veja a sua posição atual e encontre o melhor caminho.</p>
       <button class="button button-primary hero-button" :class="{ 'button-tracking': tracking }" :disabled="loading" :aria-busy="locating" @click="$emit('locate')">
         <span v-if="locating" class="button-spinner" aria-hidden="true"></span>
         <svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
