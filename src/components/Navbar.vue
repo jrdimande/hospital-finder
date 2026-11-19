@@ -1,9 +1,9 @@
 <template>
   <header class="site-header">
     <nav class="navbar page-shell" aria-label="Navegação principal">
-      <a class="brand" href="#inicio" aria-label="Saúde MZ — início">
+      <a class="brand" href="#inicio" aria-label="Hospital finder MZ — início">
         <span class="brand-mark" aria-hidden="true"><span></span></span>
-        <span>Saúde <strong>MZ</strong></span>
+        <span>Hospital finder <strong>MZ</strong></span>
       </a>
       <div class="nav-links">
         <a href="#inicio">Início</a>

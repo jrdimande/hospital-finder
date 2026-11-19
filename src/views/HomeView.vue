@@ -240,6 +240,11 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
 
     <section id="encontrar" class="finder-section">
       <div class="page-shell">
+        <div class="search-heading">
+          <div class="section-kicker"><span></span> PESQUISA</div>
+          <h2>Encontre cuidados de saúde</h2>
+          <p>Pesquise pelo nome da unidade ou escolha uma província.</p>
+        </div>
         <SearchBar
           v-model="searchQuery"
           v-model:province-value="selectedProvince"
@@ -337,9 +342,9 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
           <div class="about-caption"><span class="live-dot"></span> Saúde mais perto, para todos</div>
         </div>
         <div class="about-copy">
-          <div class="section-kicker"><span></span> SOBRE O SAÚDE MZ</div>
+          <div class="section-kicker"><span></span> SOBRE O HOSPITAL FINDER MZ</div>
           <h2>Informação que ajuda a chegar a tempo.</h2>
-          <p>Encontrar uma unidade sanitária pode ser difícil quando não conhecemos a região. O Saúde MZ reúne dados geográficos públicos para ajudar a descobrir hospitais, perceber onde ficam e iniciar uma rota.</p>
+          <p>Encontrar uma unidade sanitária pode ser difícil quando não conhecemos a região. O Hospital finder MZ reúne dados geográficos públicos para ajudar a descobrir hospitais, perceber onde ficam e iniciar uma rota.</p>
           <div class="about-points">
             <div><span class="check-mark">✓</span><span><strong>Dados abertos</strong><small>Informação geográfica disponibilizada pelo MozGIS.</small></span></div>
             <div><span class="check-mark">✓</span><span><strong>Mais fácil de encontrar</strong><small>Pesquisa por nome e província, com mapa interativo.</small></span></div>
@@ -352,13 +357,13 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
   <footer id="contacto" class="site-footer">
     <div class="page-shell footer-main">
       <div class="footer-brand">
-        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><span></span></span><span>Saúde <strong>MZ</strong></span></a>
+        <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"><span></span></span><span>Hospital finder <strong>MZ</strong></span></a>
         <p>Mais perto dos cuidados de saúde em Moçambique.</p>
       </div>
       <div class="footer-column"><strong>Explorar</strong><a href="#encontrar">Encontrar hospitais</a><a href="#sobre">Sobre o projeto</a></div>
       <div class="footer-column"><strong>Fontes</strong><a href="https://www.mozgis.gov.mz/" target="_blank" rel="noreferrer">Dados: MozGIS ↗</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">Mapa e rotas: OpenStreetMap ↗</a></div>
       <div class="footer-column"><strong>Contacto</strong><span>Contacto do projeto não disponibilizado.</span><span>Projeto informativo</span></div>
     </div>
-    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Saúde MZ</span><span>Os dados MozGIS no site são atualizados automaticamente a cada 6 horas. Confirme a informação junto da unidade.</span></div>
+    <div class="page-shell footer-bottom"><span>© {{ new Date().getFullYear() }} Hospital finder MZ</span><span>Os dados MozGIS no site são atualizados automaticamente a cada 6 horas. Confirme a informação junto da unidade.</span></div>
   </footer>
 </template>
