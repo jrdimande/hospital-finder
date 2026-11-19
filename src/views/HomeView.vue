@@ -49,6 +49,28 @@ const searchedHospitals = computed(() => {
   })
 })
 
+const searchSuggestions = computed(() => {
+  const query = searchQuery.value.trim().toLocaleLowerCase('pt')
+  if (query.length < 2) return []
+
+  return hospitals.value
+    .map((hospital) => {
+      const location = [hospital.properties.PostoAdministrativo, hospital.properties.Distrito, hospital.properties.Provincia]
+        .filter((value, index, values) => value && values.indexOf(value) === index)
+        .join(', ')
+      return {
+        id: hospital.id,
+        name: hospital.name,
+        type: hospital.type,
+        location,
+        searchable: [hospital.name, hospital.type, location].filter(Boolean).join(' ').toLocaleLowerCase('pt'),
+      }
+    })
+    .filter((suggestion) => suggestion.searchable.includes(query))
+    .sort((a, b) => Number(!a.name.toLocaleLowerCase('pt').startsWith(query)) - Number(!b.name.toLocaleLowerCase('pt').startsWith(query)))
+    .slice(0, 6)
+})
+
 const rankedHospitals = computed(() => [
   ...searchedHospitals.value,
   ...mapPlaces.value,
@@ -92,7 +114,23 @@ async function searchPlaces() {
   mapPlaces.value = []
   placeSearchError.value = ''
   placeSearchMessage.value = ''
-  if (!searchQuery.value.trim() || searchedHospitals.value.length) return
+  if (!searchQuery.value.trim()) return
+
+  if (searchedHospitals.value.length) {
+    const query = searchQuery.value.trim().toLocaleLowerCase('pt')
+    const destination = [...searchedHospitals.value].sort((a, b) => {
+      const nameScore = (hospital) => {
+        const name = hospital.name.toLocaleLowerCase('pt')
+        return name === query ? 0 : name.startsWith(query) ? 1 : name.includes(query) ? 2 : 3
+      }
+      const relevance = nameScore(a) - nameScore(b)
+      if (relevance) return relevance
+      if (location.value) return haversineDistanceKm(location.value, a) - haversineDistanceKm(location.value, b)
+      return 0
+    })[0]
+    showRoute(destination)
+    return
+  }
 
   const requestId = ++placeSearchRequestId
   placeSearchLoading.value = true
@@ -103,10 +141,7 @@ async function searchPlaces() {
     if (!mapPlaces.value.length) {
       placeSearchMessage.value = `Não encontrámos “${searchQuery.value.trim()}” nos dados MozGIS nem no mapa. Tente outro nome ou inclua a cidade.`
     } else {
-      selectedId.value = mapPlaces.value[0].id
-      requestAnimationFrame(() => {
-        document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
+      showRoute(mapPlaces.value[0])
     }
   } catch (cause) {
     if (requestId !== placeSearchRequestId) return
@@ -150,7 +185,7 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
     pendingRouteHospital.value = hospital
     pendingRouteScroll.value = scroll
     nearbyActive.value = false
-    locate()
+    if (!locating.value) locate()
     return
   }
   pendingRouteHospital.value = null
@@ -258,6 +293,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         </div>
         <SearchBar
           v-model="searchQuery"
+          :suggestions="searchSuggestions"
           @search="searchPlaces"
         />
         <div v-if="placeSearchLoading" class="place-search-status" role="status">

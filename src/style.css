@@ -92,6 +92,13 @@ button { cursor: pointer; }
 .search-heading h2 { margin: 8px 0 4px; color: var(--navy); font: 750 23px/1.25 'Segoe UI', sans-serif; letter-spacing: -.65px; }
 .search-heading p { margin: 0; color: #718394; font-size: 13px; }
 .search-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-height: 82px; border: 1px solid #e4ebef; border-radius: 12px; background: white; align-items: stretch; padding: 10px; box-shadow: 0 9px 25px #25465e08; }
+.search-autocomplete { position: relative; min-width: 0; }
+.search-suggestions { position: absolute; z-index: 12; top: calc(100% + 6px); left: 0; right: 0; max-height: 300px; overflow-y: auto; margin: 0; padding: 5px 0; list-style: none; border: 1px solid #dce5e0; border-radius: 4px; background: white; box-shadow: 0 8px 20px #17364b18; }
+.search-suggestions li + li { border-top: 1px solid #edf1ee; }
+.search-suggestions button { display: grid; gap: 3px; width: 100%; padding: 10px 13px; border: 0; background: white; color: #344c5e; text-align: left; }
+.search-suggestions button:hover, .search-suggestions button.is-active { background: #f1f6f3; }
+.search-suggestions button span { overflow: hidden; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.search-suggestions button small { overflow: hidden; color: #718594; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .search-hint { margin: 7px 3px 0; color: #718594; font-size: 11px; }
 .place-search-status { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 12px 14px; border: 1px solid #dce9ed; border-radius: 8px; background: #fff; color: #526f80; font-size: 12px; line-height: 1.5; }
 .place-search-status .loading-spinner { width: 18px; height: 18px; flex: none; }

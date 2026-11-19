@@ -48,7 +48,7 @@ function renderHospitals() {
       fillColor: markerColor(hospital.category),
       fillOpacity: 0.94,
       bubblingMouseEvents: false,
-    }).bindPopup(popupContent(hospital)).bindTooltip(hospital.name, { direction: 'top', offset: [0, -5] })
+    }).bindPopup(popupContent(hospital))
     marker.on('click', () => emit('select', hospital))
     marker.addTo(hospitalLayer)
     markerById.set(hospital.id, marker)
@@ -99,7 +99,6 @@ function updateSelectedMarker() {
       fillColor: markerColor(hospital?.category),
       fillOpacity: 0.98,
     })
-    if (id === props.selectedId) marker.openPopup()
   })
 }
 
@@ -199,7 +198,6 @@ watch(() => props.selectedId, (selectedId) => {
     } else {
       map.panTo(marker.getLatLng())
     }
-    marker.openPopup()
   }
 })
 
