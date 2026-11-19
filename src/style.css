@@ -150,6 +150,7 @@ button { cursor: pointer; }
 .map-live-dot { width: 6px; height: 6px; }
 .map-total { color: #93a2ac; font-size: 10px; }
 .map-canvas { position: relative; }
+.map-empty-prompt { position: absolute; z-index: 2; top: 50%; left: 50%; width: max-content; max-width: calc(100% - 32px); transform: translate(-50%, -50%); padding: 12px 15px; border: 1px solid #dce6e1; border-radius: 4px; background: #fff; color: #526b78; font-size: 12px; line-height: 1.5; text-align: center; box-shadow: 0 2px 8px #17364b12; pointer-events: none; }
 .leaflet-map { height: 498px; width: 100%; z-index: 1; background: #eaf1ef; }
 .route-summary { position: relative; z-index: 3; display: flex; align-items: center; gap: 10px; padding: 11px 15px; border-bottom: 1px solid #e8eef1; background: #f7fbfc; }
 .route-summary-icon { display: grid; place-items: center; flex: none; width: 29px; height: 29px; border-radius: 8px; color: white; background: var(--blue); font-size: 16px; }

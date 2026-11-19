@@ -90,6 +90,16 @@ const matchingHospitals = computed(() => {
 })
 const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
 const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || nearbyActive.value))
+const mapHospitals = computed(() => {
+  if (nearbyActive.value || searchQuery.value.trim()) {
+    return (nearbyActive.value ? matchingHospitals.value : rankedHospitals.value).map((item) => item.hospital)
+  }
+  const selectedHospital = [...hospitals.value, ...mapPlaces.value].find((hospital) => hospital.id === selectedId.value)
+  return selectedHospital ? [selectedHospital] : []
+})
+const mapEmptyPrompt = computed(() => !hasActiveFilters.value && !selectedId.value
+  ? 'Pesquise uma unidade ou selecione um resultado para ver os pontos no mapa.'
+  : '')
 
 watch(routeMode, () => {
   if (!route.value) return
@@ -336,7 +346,8 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
               </div>
             </div>
             <HospitalMap
-              :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"
+              :hospitals="mapHospitals"
+              :empty-prompt="mapEmptyPrompt"
               :user-location="location"
               :route-mode="routeMode"
               :selected-id="selectedId"
