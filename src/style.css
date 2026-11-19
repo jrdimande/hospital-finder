@@ -254,7 +254,7 @@ button { cursor: pointer; }
 .about-point { position: absolute; display: block; width: 13px; height: 13px; background: #e6655d; border: 3px solid white; box-shadow: 0 3px 8px #466b7040; border-radius: 50%; }
 .point-a { top: 25%; left: 28%; }.point-b { bottom: 25%; right: 26%; }.point-c { top: 31%; right: 20%; width: 9px; height: 9px; }
 .about-caption { position: absolute; left: 15px; bottom: 15px; display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 5px; padding: 10px 12px; color: #52717c; font-size: 10px; box-shadow: 0 3px 10px #29495710; }
-.about-copy h2 { font-size: 31px; line-height: 1.24; margin: 12px 0; max-width: 490px; }
+.about-copy h1, .about-copy h2 { font-family: Manrope, sans-serif; color: var(--navy); letter-spacing: -1px; font-size: 31px; line-height: 1.24; margin: 12px 0; max-width: 490px; }
 .about-copy > p { color: #778a98; font-size: 12px; line-height: 1.8; max-width: 500px; }
 .about-points { margin-top: 23px; display: grid; gap: 15px; }
 .about-points > div { display: flex; align-items: center; gap: 10px; }
@@ -262,6 +262,23 @@ button { cursor: pointer; }
 .about-points strong, .about-points small { display: block; }
 .about-points strong { color: #425f70; font-size: 10px; }
 .about-points small { margin-top: 3px; color: #8998a4; font-size: 9px; }
+
+.info-data-section { padding: 0 0 78px; background: #fff; }
+.info-data-section > .page-shell > h2 { margin: 9px 0 5px; color: var(--navy); font: 750 25px/1.25 Manrope, sans-serif; letter-spacing: -.7px; }
+.info-intro { margin: 0; color: #778a98; font-size: 13px; line-height: 1.7; }
+.info-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 25px; }
+.info-card { min-height: 220px; padding: 20px; border: 1px solid #e7eef1; border-radius: 10px; background: #fff; box-shadow: 0 6px 24px #17364b07; }
+.info-card-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: var(--blue); background: #edf6fa; font-size: 18px; }
+.info-card-icon.green { color: var(--green); background: #eaf6f0; }
+.info-card h3 { margin: 14px 0 7px; color: #345065; font: 700 15px/1.35 Manrope, sans-serif; }
+.info-card p { margin: 0; color: #718594; font-size: 12px; line-height: 1.7; }
+.info-card p + p { margin-top: 8px; }
+.info-card a { display: inline-block; margin-top: 12px; color: var(--blue); font-size: 11px; font-weight: 700; }
+.info-card a:hover { text-decoration: underline; }
+.info-card small { display: block; margin-top: 8px; color: #8998a4; font-size: 10px; }
+.info-card .info-update-note { margin-top: 10px; font-size: 11px; }
+.info-card .info-error { color: #8d4037; }
+.info-disclaimer { margin: 20px 0 0; padding: 13px 15px; border: 1px solid #e4edf0; border-radius: 8px; background: #f5f9fc; color: #607785; font-size: 12px; line-height: 1.6; }
 
 .site-footer { color: #cfdae0; background: #17364b; }
 .footer-main { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 30px; padding-top: 43px; padding-bottom: 37px; }
@@ -297,7 +314,7 @@ button { cursor: pointer; }
   .brand-mark { width: 28px; height: 28px; border-radius: 8px; }
   .nav-links { gap: 0; }
   .nav-links a { display: none; }
-  .nav-links a:nth-child(1) { display: inline; border-radius: 6px; padding: 9px 10px; background: #eef7fa; color: var(--blue); font-size: 10px; }
+  .nav-links a:nth-child(1), .nav-links a:nth-child(3) { display: inline; border-radius: 6px; padding: 9px 10px; background: #eef7fa; color: var(--blue); font-size: 10px; }
   .hero { display: flex; flex-direction: column; align-items: stretch; padding-top: 38px; min-height: 0; }
   .hero-copy { padding-bottom: 18px; }
   .hero h1 { font-size: clamp(37px, 10vw, 47px); letter-spacing: -1.4px; margin-top: 17px; }
@@ -340,8 +357,12 @@ button { cursor: pointer; }
   .results-heading h2 { font-size: 18px; }
   .about-section { padding: 51px 0; }
   .about-grid { grid-template-columns: 1fr; gap: 27px; }
+  .info-data-section { padding-bottom: 51px; }
+  .info-card-grid { grid-template-columns: 1fr; gap: 11px; margin-top: 19px; }
+  .info-card { min-height: 0; padding: 17px; }
+  .info-data-section > .page-shell > h2 { font-size: 22px; }
   .about-visual { height: 230px; }
-  .about-copy h2 { font-size: 27px; }
+  .about-copy h1, .about-copy h2 { font-size: 27px; }
   .about-copy > p { font-size: 11px; }
   .footer-main { grid-template-columns: 1fr 1fr; gap: 25px 18px; padding-top: 32px; padding-bottom: 25px; }
   .footer-brand { grid-column: span 2; }

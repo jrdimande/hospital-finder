@@ -7,7 +7,7 @@
       </a>
       <div class="nav-links">
         <a href="#inicio">Início</a>
-        <a href="#sobre">Sobre o projeto</a>
+        <a href="#/info">Info</a>
         <a href="#contacto">Contacto</a>
       </div>
       <a class="nav-action" href="#encontrar">Explorar mapa <span aria-hidden="true">↗</span></a>
