@@ -223,7 +223,7 @@ function centerOnUser() {
   <div class="map-canvas">
     <div v-if="routeLoading" class="map-feedback" role="status">
       <span class="loading-spinner" aria-hidden="true"></span>
-      A calcular a rota rodoviária…
+      A calcular a rota…
     </div>
     <div v-else-if="routeError" class="map-feedback map-feedback-error" role="alert">
       <span>{{ routeError }}</span>
@@ -233,14 +233,15 @@ function centerOnUser() {
       <span class="route-summary-icon" aria-hidden="true">↗</span>
       <span class="route-summary-text">
         <strong>Rota para {{ route.destinationName }}</strong>
-        <small>~{{ (route.distanceMeters / 1000).toFixed(1) }} km · ~{{ Math.max(1, Math.round(route.durationSeconds / 60)) }} min de carro</small>
+        <small>~{{ (route.distanceMeters / 1000).toFixed(1) }} km · ~{{ Math.max(1, Math.round(route.durationSeconds / 60)) }} min {{ route.mode === 'pedestrian' ? 'a pé' : route.mode === 'motorcycle' ? 'de mota*' : 'de carro' }}</small>
       </span>
       <button class="route-clear" type="button" @click="emit('clear-route')">Limpar</button>
     </div>
+    <p v-if="route?.mode === 'motorcycle'" class="route-mode-note">* Mota usa o perfil rodoviário de carro; o percurso pode não refletir restrições específicas para motas.</p>
     <button v-if="userLocation" class="map-recenter" type="button" aria-label="Centrar mapa na minha localização" @click="centerOnUser">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
       <span>A minha localização</span>
     </button>
-    <div ref="mapElement" class="leaflet-map" role="application" aria-label="Mapa interativo de unidades sanitárias e rota rodoviária"></div>
+    <div ref="mapElement" class="leaflet-map" role="application" aria-label="Mapa interativo de unidades sanitárias e rota no modo selecionado"></div>
   </div>
 </template>

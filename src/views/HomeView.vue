@@ -9,7 +9,7 @@ import SearchBar from '../components/SearchBar.vue'
 import { useGeolocation } from '../composables/useGeolocation'
 import { useHospitals } from '../composables/useHospitals'
 import { searchMapPlaces } from '../services/placeSearchService'
-import { fetchDrivingRoute } from '../services/routingService'
+import { fetchRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
 
 const { hospitals, loading, error, reload } = useHospitals()
@@ -28,6 +28,7 @@ const placeSearchError = ref('')
 const placeSearchMessage = ref('')
 let placeSearchRequestId = 0
 const route = ref(null)
+const routeMode = ref('car')
 const routeError = ref('')
 const routeLoadingId = ref(null)
 let routeRequestId = 0
@@ -65,6 +66,12 @@ const matchingHospitals = computed(() => {
 })
 const visibleHospitals = computed(() => matchingHospitals.value.slice(0, showAllResults.value ? matchingHospitals.value.length : nearbyActive.value ? 5 : 6))
 const hasActiveFilters = computed(() => Boolean(searchQuery.value.trim() || nearbyActive.value))
+
+watch(routeMode, () => {
+  if (!route.value) return
+  const destination = [...hospitals.value, ...mapPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
+  if (destination) showRoute(destination, { scroll: false })
+})
 
 watch([searchQuery, nearbyActive], () => { showAllResults.value = false })
 watch(searchQuery, () => {
@@ -153,8 +160,15 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
 
   try {
     const origin = { latitude: location.value.latitude, longitude: location.value.longitude }
+    const requestedMode = routeMode.value
+    const routeResult = await fetchRoute(origin, hospital, requestedMode)
+    if (requestId !== routeRequestId) return
+    if (requestedMode !== routeMode.value) {
+      showRoute(hospital, { scroll: false })
+      return
+    }
     route.value = {
-      ...await fetchDrivingRoute(origin, hospital),
+      ...routeResult,
       hospitalId: hospital.id,
       destinationName: hospital.name,
       origin,
@@ -163,14 +177,14 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
   } catch (error) {
     if (requestId === routeRequestId) {
       const message = error instanceof Error ? error.message : 'Ocorreu um erro ao calcular a rota.'
-      const nextHospital = automatic && message.includes('Não foi possível encontrar uma rota rodoviária')
+      const nextHospital = automatic && message.includes('Não foi possível encontrar uma rota para esta unidade')
         ? automaticRouteQueue.value.shift()
         : null
       if (nextHospital) {
         showRoute(nextHospital, { scroll: false, automatic: true })
       } else {
         automaticRouteQueue.value = []
-        routeError.value = automatic && message.includes('Não foi possível encontrar uma rota rodoviária')
+        routeError.value = automatic && message.includes('Não foi possível encontrar uma rota para esta unidade')
           ? 'Não foi encontrada uma rota para as unidades disponíveis próximas de si. Escolha outra unidade na lista para tentar novamente.'
           : message
       }
@@ -274,6 +288,14 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>Mapa de unidades sanitárias</strong></div>
               <div class="map-header-actions">
+                <label class="route-mode-control">
+                  <span>Trajeto</span>
+                  <select v-model="routeMode" aria-label="Modo de deslocação para calcular a rota">
+                    <option value="pedestrian">Peão</option>
+                    <option value="car">Carro</option>
+                    <option value="motorcycle">Mota</option>
+                  </select>
+                </label>
                 <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }}</span>
               </div>
             </div>
@@ -295,7 +317,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
               <span><i class="legend-dot post-dot"></i> Posto de saúde</span>
               <span v-if="mapPlaces.length"><i class="legend-dot search-result-dot"></i> Local pesquisado</span>
               <span><i class="legend-dot user-dot"></i> Posição GPS</span>
-              <small>Rota rodoviária estimada pelo OSRM.</small>
+              <small>Rotas: <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noreferrer">OSRM/FOSSGIS</a> · dados OSM (<a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">corrigir mapa</a>)</small>
             </div>
           </div>
           <HospitalList

@@ -1,6 +1,30 @@
-const ROUTING_URL = 'https://router.project-osrm.org/route/v1/driving'
+const ROUTING_PROFILES = {
+  pedestrian: {
+    url: 'https://routing.openstreetmap.de/routed-foot/route/v1/driving',
+    label: 'peão',
+  },
+  car: {
+    url: 'https://routing.openstreetmap.de/routed-car/route/v1/driving',
+    label: 'carro',
+  },
+  motorcycle: {
+    url: 'https://routing.openstreetmap.de/routed-car/route/v1/driving',
+    label: 'mota',
+  },
+}
+let nextRequestAt = 0
 
-export async function fetchDrivingRoute(origin, destination) {
+async function waitForRequestSlot() {
+  const now = Date.now()
+  const delay = Math.max(0, nextRequestAt - now)
+  nextRequestAt = Math.max(now, nextRequestAt) + 1000
+  if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
+}
+
+export async function fetchRoute(origin, destination, mode = 'car') {
+  const profile = ROUTING_PROFILES[mode]
+  if (!profile) throw new Error('Escolha um modo de deslocação válido.')
+
   const coordinates = [origin, destination]
   if (coordinates.some(({ latitude, longitude }) =>
     !Number.isFinite(latitude) ||
@@ -15,10 +39,11 @@ export async function fetchDrivingRoute(origin, destination) {
   const coordinatePath = coordinates
     .map(({ latitude, longitude }) => `${longitude},${latitude}`)
     .join(';')
-  const url = `${ROUTING_URL}/${coordinatePath}?overview=full&geometries=geojson&steps=false`
+  const url = `${profile.url}/${coordinatePath}?overview=full&geometries=geojson&steps=false`
 
   let response
   try {
+    await waitForRequestSlot()
     response = await fetch(url, { signal: AbortSignal.timeout(15000) })
   } catch {
     throw new Error('Não foi possível contactar o serviço de rotas. Verifique a ligação à internet e tente novamente.')
@@ -37,12 +62,13 @@ export async function fetchDrivingRoute(origin, destination) {
 
   const result = data?.routes?.[0]
   if (data?.code !== 'Ok' || !result?.geometry?.coordinates?.length) {
-    throw new Error('Não foi possível encontrar uma rota rodoviária para esta unidade.')
+    throw new Error(`Não foi possível encontrar uma rota para esta unidade no modo ${profile.label}.`)
   }
 
   return {
     coordinates: result.geometry.coordinates,
     distanceMeters: result.distance,
     durationSeconds: result.duration,
+    mode,
   }
 }
