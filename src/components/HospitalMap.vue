@@ -4,7 +4,6 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   hospitals: { type: Array, default: () => [] },
-  emptyPrompt: { type: String, default: '' },
   userLocation: { type: Object, default: null },
   routeMode: { type: String, default: 'car' },
   selectedId: { type: [String, Number], default: null },
@@ -235,7 +234,6 @@ function centerOnUser() {
 
 <template>
   <div class="map-canvas">
-    <div v-if="emptyPrompt" class="map-empty-prompt" role="status">{{ emptyPrompt }}</div>
     <div v-if="routeLoading" class="map-feedback" role="status">
       <span class="loading-spinner" aria-hidden="true"></span>
       A calcular a rota…
