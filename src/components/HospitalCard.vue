@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { formatDistance } from '../utils/distance'
+import { extractPhoneNumbers } from '../utils/phone'
 
 const props = defineProps({
   hospital: { type: Object, required: true },
@@ -38,13 +39,29 @@ const detailFields = computed(() => Object.entries(props.hospital.properties)
     <h3>{{ hospital.name }}</h3>
     <p v-if="hospital.type" class="hospital-type">{{ hospital.type }}</p>
     <div class="hospital-fields">
-      <span v-for="[label, value] in fields" :key="label"><strong>{{ label }}:</strong> {{ value }}</span>
+      <span v-for="[label, value] in fields" :key="label">
+        <strong>{{ label }}:</strong>
+        <template v-if="label === 'Contacto' && extractPhoneNumbers(value).length">
+          <template v-for="(phone, index) in extractPhoneNumbers(value)" :key="phone">
+            <span v-if="index">, </span><a :href="`tel:${phone}`">{{ phone }}</a>
+          </template>
+        </template>
+        <template v-else>{{ value }}</template>
+      </span>
     </div>
     <details v-if="detailFields.length" class="hospital-details">
       <summary>Consultar dados disponíveis</summary>
       <dl>
         <template v-for="[key, value] in detailFields" :key="key">
-          <dt>{{ key }}</dt><dd>{{ value }}</dd>
+          <dt>{{ key }}</dt>
+          <dd>
+            <template v-if="extractPhoneNumbers(value).length">
+              <template v-for="(phone, index) in extractPhoneNumbers(value)" :key="phone">
+                <span v-if="index">, </span><a :href="`tel:${phone}`">{{ phone }}</a>
+              </template>
+            </template>
+            <template v-else>{{ value }}</template>
+          </dd>
         </template>
       </dl>
     </details>

@@ -1,6 +1,7 @@
 <script setup>
 import L from 'leaflet'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { extractPhoneNumbers } from '../utils/phone'
 
 const props = defineProps({
   hospitals: { type: Array, default: () => [] },
@@ -77,7 +78,16 @@ function popupContent(hospital) {
     ['Contacto', hospital.properties.ContactoResponsavel],
   ].filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== '')
 
-  return `<strong>${escapeHtml(hospital.name)}</strong>${details.map(([label, value]) => `<br><span>${escapeHtml(label)}: ${escapeHtml(value)}</span>`).join('')}`
+  return `<strong>${escapeHtml(hospital.name)}</strong>${details.map(([label, value]) => {
+    if (label === 'Contacto') {
+      const phones = extractPhoneNumbers(value)
+      if (phones.length) {
+        const links = phones.map((phone) => `<a href="tel:${phone}">${escapeHtml(phone)}</a>`).join(', ')
+        return `<br><span>${escapeHtml(label)}: ${links}</span>`
+      }
+    }
+    return `<br><span>${escapeHtml(label)}: ${escapeHtml(value)}</span>`
+  }).join('')}`
 }
 
 function escapeHtml(value) {
