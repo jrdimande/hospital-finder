@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { formatDistance } from '../utils/distance'
+import { phoneHref } from '../utils/phone'
 
 const props = defineProps({
   hospital: { type: Object, required: true },
@@ -58,7 +59,7 @@ const detailFields = computed(() => {
       <summary>Mais informações</summary>
       <dl>
         <template v-for="[key, value] in detailFields" :key="key">
-          <dt>{{ key }}</dt><dd>{{ value }}</dd>
+          <dt>{{ key }}</dt><dd><a v-if="key === 'Pessoa de contacto' && phoneHref(value)" :href="phoneHref(value)">{{ value }}</a><template v-else>{{ value }}</template></dd>
         </template>
       </dl>
     </details>

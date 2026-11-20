@@ -1,6 +1,7 @@
 <script setup>
 import L from 'leaflet'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { phoneHref } from '../utils/phone'
 
 const props = defineProps({
   hospitals: { type: Array, default: () => [] },
@@ -88,7 +89,12 @@ function popupContent(hospital) {
     ['Contacto', hospital.properties.ContactoResponsavel],
   ].filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== '')
 
-  return `<strong>${escapeHtml(hospital.name)}</strong>${details.map(([label, value]) => `<br><span>${escapeHtml(label)}: ${escapeHtml(value)}</span>`).join('')}<br><a class="hospital-google-maps" href="${escapeHtml(googleMapsUrl(hospital))}" target="_blank" rel="noopener noreferrer">Navegar no Google Maps ↗</a>`
+  return `<strong>${escapeHtml(hospital.name)}</strong>${details.map(([label, value]) => {
+    const contactLink = label === 'Contacto' && phoneHref(value)
+      ? `<a href="${escapeHtml(phoneHref(value))}">${escapeHtml(value)}</a>`
+      : escapeHtml(value)
+    return `<br><span>${escapeHtml(label)}: ${contactLink}</span>`
+  }).join('')}<br><a class="hospital-google-maps" href="${escapeHtml(googleMapsUrl(hospital))}" target="_blank" rel="noopener noreferrer">Navegar no Google Maps ↗</a>`
 }
 
 function googleMapsUrl(hospital) {
