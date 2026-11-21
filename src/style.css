@@ -166,13 +166,21 @@ button { cursor: pointer; }
 .result-count { color: #78909f; white-space: nowrap; font-size: 9px; padding-bottom: 3px; }
 .radius-filter { display: flex; gap: 5px; align-items: center; font-size: 9px; color: #8a9ba6; }
 .radius-filter select { border: 1px solid #e5ecef; border-radius: 5px; padding: 6px 19px 6px 8px; color: #526e80; background: #fff; font-size: 9px; }
+.favorites-filter { display: flex; gap: 5px; align-items: center; font-size: 9px; color: #8a9ba6; cursor: pointer; }
+.favorites-filter input { accent-color: #df625c; }
 .hospital-list { display: grid; gap: 9px; max-height: 582px; overflow-y: auto; padding: 1px 3px 4px 0; scrollbar-color: #d5e0e5 transparent; scrollbar-width: thin; }
 .hospital-card { border: 1px solid #e8eef1; border-radius: 8px; padding: 13px; transition: border-color .2s, background .2s, box-shadow .2s; }
 .hospital-card:hover, .hospital-card.is-selected { border-color: #a8d1d8; background: #fcfefe; box-shadow: 0 4px 13px #176f9f0c; }
 .card-topline { display: flex; align-items: center; justify-content: space-between; }
+.card-topline-left { display: flex; align-items: center; gap: 8px; }
 .hospital-icon { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; color: #df625c; background: #fff1ef; }
 .hospital-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .distance-pill { border-radius: 30px; padding: 5px 9px; background: #eaf6f0; color: #2d8e6d; font-size: 9px; font-weight: 700; }
+.favorite-toggle { width: 28px; height: 28px; display: grid; place-items: center; border: none; border-radius: 7px; background: #f3f6f7; color: #a8b7bf; cursor: pointer; transition: background .2s, color .2s; }
+.favorite-toggle svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.favorite-toggle:hover { color: #df625c; background: #fff1ef; }
+.favorite-toggle.is-active { color: #df625c; background: #fff1ef; }
+.favorite-toggle.is-active svg { fill: currentColor; }
 .hospital-card h3 { margin: 9px 0 2px; color: #2b4659; font-size: 12px; font-weight: 700; }
 .hospital-type { color: var(--blue); margin: 0 0 8px; font-size: 9px; }
 .hospital-fields { display: grid; gap: 4px; color: #758997; font-size: 9px; }

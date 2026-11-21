@@ -1,0 +1,225 @@
+diff --git a/src/components/HospitalCard.vue b/src/components/HospitalCard.vue
+index 9b30463..15f1842 100644
+--- a/src/components/HospitalCard.vue
++++ b/src/components/HospitalCard.vue
+@@ -9,9 +9,10 @@ const props = defineProps({
+   selected: { type: Boolean, default: false },
+   hasUserLocation: { type: Boolean, default: false },
+   routeLoading: { type: Boolean, default: false },
++  isFavorite: { type: Boolean, default: false },
+ })
+ 
+-defineEmits(['select', 'directions'])
++defineEmits(['select', 'directions', 'toggle-favorite'])
+ 
+ const fields = computed(() => {
+   const properties = props.hospital.properties
+@@ -31,10 +32,23 @@ const detailFields = computed(() => Object.entries(props.hospital.properties)
+ <template>
+   <article class="hospital-card" :class="{ 'is-selected': selected }">
+     <div class="card-topline">
+-      <span class="hospital-icon" aria-hidden="true">
+-        <svg viewBox="0 0 24 24"><path d="M4 21V5h16v16M2 21h20M9 9h6M12 6v6M8 16h.01M16 16h.01"/></svg>
++      <span class="card-topline-left">
++        <span class="hospital-icon" aria-hidden="true">
++          <svg viewBox="0 0 24 24"><path d="M4 21V5h16v16M2 21h20M9 9h6M12 6v6M8 16h.01M16 16h.01"/></svg>
++        </span>
++        <span v-if="distanceKm !== null" class="distance-pill">{{ formatDistance(distanceKm) }}</span>
+       </span>
+-      <span v-if="distanceKm !== null" class="distance-pill">{{ formatDistance(distanceKm) }}</span>
++      <button
++        type="button"
++        class="favorite-toggle"
++        :class="{ 'is-active': isFavorite }"
++        :aria-pressed="isFavorite"
++        :title="isFavorite ? 'Remover dos favoritos' : 'Guardar nos favoritos'"
++        @click="$emit('toggle-favorite', hospital)"
++      >
++        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.35-9.5-8.5C.8 8.1 2.2 4.5 6 4a5 5 0 0 1 6 2 5 5 0 0 1 6-2c3.8.5 5.2 4.1 3.5 7.5C19 15.65 12 20 12 20Z"/></svg>
++        <span class="sr-only">{{ isFavorite ? 'Remover dos favoritos' : 'Guardar nos favoritos' }}</span>
++      </button>
+     </div>
+     <h3>{{ hospital.name }}</h3>
+     <p v-if="hospital.type" class="hospital-type">{{ hospital.type }}</p>
+diff --git a/src/components/HospitalList.vue b/src/components/HospitalList.vue
+index 128fa27..f42a47d 100644
+--- a/src/components/HospitalList.vue
++++ b/src/components/HospitalList.vue
+@@ -9,9 +9,12 @@ defineProps({
+   routeLoadingId: { type: [String, Number], default: null },
+   nearbyActive: { type: Boolean, default: false },
+   distanceFilter: { type: String, default: 'all' },
++  isFavorite: { type: Function, default: () => false },
++  favoritesOnly: { type: Boolean, default: false },
++  favoritesCount: { type: Number, default: 0 },
+ })
+ 
+-const emit = defineEmits(['select', 'directions', 'update:distanceFilter'])
++const emit = defineEmits(['select', 'directions', 'update:distanceFilter', 'toggle-favorite', 'update:favoritesOnly'])
+ </script>
+ 
+ <template>
+@@ -32,6 +35,10 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter'])
+           <option value="all">Todos</option>
+         </select>
+       </label>
++      <label v-if="favoritesCount" class="favorites-filter">
++        <input type="checkbox" :checked="favoritesOnly" @change="emit('update:favoritesOnly', $event.target.checked)" />
++        <span>Só favoritos ({{ favoritesCount }})</span>
++      </label>
+       <span v-if="hospitals.length" class="result-count">{{ hospitals.length }} {{ hospitals.length === 1 ? 'unidade' : 'unidades' }}</span>
+     </div>
+     <div v-if="hospitals.length" class="hospital-list">
+@@ -43,14 +50,16 @@ const emit = defineEmits(['select', 'directions', 'update:distanceFilter'])
+         :selected="selectedId === item.hospital.id"
+         :has-user-location="hasUserLocation"
+         :route-loading="routeLoadingId === item.hospital.id"
++        :is-favorite="isFavorite(item.hospital.id)"
+         @select="emit('select', $event)"
+         @directions="emit('directions', $event)"
++        @toggle-favorite="emit('toggle-favorite', $event)"
+       />
+     </div>
+     <div v-else class="empty-state">
+       <span class="empty-icon" aria-hidden="true">⌖</span>
+-      <strong>{{ locating ? 'A obter a sua localização…' : nearbyActive && !hasUserLocation ? 'Partilhe a sua localização para encontrar hospitais próximos.' : nearbyActive ? 'Não encontrámos hospitais neste raio.' : 'Nenhuma unidade encontrada.' }}</strong>
+-      <p>{{ locating ? 'Assim que a localização estiver disponível, mostramos as unidades mais próximas.' : nearbyActive && !hasUserLocation ? 'A localização só é usada depois da sua autorização.' : nearbyActive ? 'Experimente aumentar o raio ou escolher “Todos os hospitais”.' : 'Tente alterar a pesquisa ou o filtro de província.' }}</p>
++      <strong>{{ locating ? 'A obter a sua localização…' : favoritesOnly ? 'Ainda não tem unidades nos favoritos.' : nearbyActive && !hasUserLocation ? 'Partilhe a sua localização para encontrar hospitais próximos.' : nearbyActive ? 'Não encontrámos hospitais neste raio.' : 'Nenhuma unidade encontrada.' }}</strong>
++      <p>{{ locating ? 'Assim que a localização estiver disponível, mostramos as unidades mais próximas.' : favoritesOnly ? 'Toque na estrela de uma unidade para a guardar aqui.' : nearbyActive && !hasUserLocation ? 'A localização só é usada depois da sua autorização.' : nearbyActive ? 'Experimente aumentar o raio ou escolher “Todos os hospitais”.' : 'Tente alterar a pesquisa ou o filtro de província.' }}</p>
+     </div>
+   </section>
+ </template>
+diff --git a/src/composables/useFavorites.js b/src/composables/useFavorites.js
+new file mode 100644
+index 0000000..1cc13e7
+--- /dev/null
++++ b/src/composables/useFavorites.js
+@@ -0,0 +1,47 @@
++import { ref, watch } from 'vue'
++
++const STORAGE_KEY = 'saude-mz:favoritos'
++
++function readStoredIds() {
++  if (typeof window === 'undefined') return []
++  try {
++    const raw = window.localStorage.getItem(STORAGE_KEY)
++    const parsed = raw ? JSON.parse(raw) : []
++    return Array.isArray(parsed) ? parsed : []
++  } catch {
++    return []
++  }
++}
++
++const favoriteIds = ref(new Set(readStoredIds()))
++
++watch(
++  favoriteIds,
++  (ids) => {
++    if (typeof window === 'undefined') return
++    try {
++      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]))
++    } catch {
++      // Armazenamento indisponível (ex.: modo privado); os favoritos deixam de ser persistidos.
++    }
++  },
++  { deep: true },
++)
++
++export function useFavorites() {
++  function isFavorite(id) {
++    return favoriteIds.value.has(id)
++  }
++
++  function toggleFavorite(id) {
++    const next = new Set(favoriteIds.value)
++    if (next.has(id)) {
++      next.delete(id)
++    } else {
++      next.add(id)
++    }
++    favoriteIds.value = next
++  }
++
++  return { favoriteIds, isFavorite, toggleFavorite }
++}
+diff --git a/src/style.css b/src/style.css
+index b91e2e3..e392353 100644
+--- a/src/style.css
++++ b/src/style.css
+@@ -166,13 +166,21 @@ button { cursor: pointer; }
+ .result-count { color: #78909f; white-space: nowrap; font-size: 9px; padding-bottom: 3px; }
+ .radius-filter { display: flex; gap: 5px; align-items: center; font-size: 9px; color: #8a9ba6; }
+ .radius-filter select { border: 1px solid #e5ecef; border-radius: 5px; padding: 6px 19px 6px 8px; color: #526e80; background: #fff; font-size: 9px; }
++.favorites-filter { display: flex; gap: 5px; align-items: center; font-size: 9px; color: #8a9ba6; cursor: pointer; }
++.favorites-filter input { accent-color: #df625c; }
+ .hospital-list { display: grid; gap: 9px; max-height: 582px; overflow-y: auto; padding: 1px 3px 4px 0; scrollbar-color: #d5e0e5 transparent; scrollbar-width: thin; }
+ .hospital-card { border: 1px solid #e8eef1; border-radius: 8px; padding: 13px; transition: border-color .2s, background .2s, box-shadow .2s; }
+ .hospital-card:hover, .hospital-card.is-selected { border-color: #a8d1d8; background: #fcfefe; box-shadow: 0 4px 13px #176f9f0c; }
+ .card-topline { display: flex; align-items: center; justify-content: space-between; }
++.card-topline-left { display: flex; align-items: center; gap: 8px; }
+ .hospital-icon { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; color: #df625c; background: #fff1ef; }
+ .hospital-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+ .distance-pill { border-radius: 30px; padding: 5px 9px; background: #eaf6f0; color: #2d8e6d; font-size: 9px; font-weight: 700; }
++.favorite-toggle { width: 28px; height: 28px; display: grid; place-items: center; border: none; border-radius: 7px; background: #f3f6f7; color: #a8b7bf; cursor: pointer; transition: background .2s, color .2s; }
++.favorite-toggle svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
++.favorite-toggle:hover { color: #df625c; background: #fff1ef; }
++.favorite-toggle.is-active { color: #df625c; background: #fff1ef; }
++.favorite-toggle.is-active svg { fill: currentColor; }
+ .hospital-card h3 { margin: 9px 0 2px; color: #2b4659; font-size: 12px; font-weight: 700; }
+ .hospital-type { color: var(--blue); margin: 0 0 8px; font-size: 9px; }
+ .hospital-fields { display: grid; gap: 4px; color: #758997; font-size: 9px; }
+diff --git a/src/views/HomeView.vue b/src/views/HomeView.vue
+index 87ab448..70938ba 100644
+--- a/src/views/HomeView.vue
++++ b/src/views/HomeView.vue
+@@ -7,6 +7,7 @@ import HospitalMap from '../components/HospitalMap.vue'
+ import LoadingState from '../components/LoadingState.vue'
+ import Navbar from '../components/Navbar.vue'
+ import SearchBar from '../components/SearchBar.vue'
++import { useFavorites } from '../composables/useFavorites'
+ import { useGeolocation } from '../composables/useGeolocation'
+ import { useHospitals } from '../composables/useHospitals'
+ import { fetchDrivingRoute } from '../services/routingService'
+@@ -14,10 +15,12 @@ import { haversineDistanceKm } from '../utils/distance'
+ 
+ const { hospitals, loading, error, updatedAt, provinces, reload } = useHospitals()
+ const { location, locating, tracking, error: locationError, locate } = useGeolocation()
++const { favoriteIds, isFavorite, toggleFavorite } = useFavorites()
+ const searchQuery = ref('')
+ const selectedProvince = ref('')
+ const distanceFilter = ref('all')
+ const nearbyActive = ref(false)
++const favoritesOnly = ref(false)
+ const selectedId = ref(null)
+ const route = ref(null)
+ const routeError = ref('')
+@@ -51,9 +54,13 @@ const rankedHospitals = computed(() => searchedHospitals.value
+   }))
+ 
+ const visibleHospitals = computed(() => {
+-  if (!nearbyActive.value) return rankedHospitals.value.slice(0, 6)
++  const base = favoritesOnly.value
++    ? rankedHospitals.value.filter((item) => isFavorite(item.hospital.id))
++    : rankedHospitals.value
++  if (!nearbyActive.value) return favoritesOnly.value ? base : base.slice(0, 6)
+   const radius = distanceFilter.value === 'all' ? Infinity : Number(distanceFilter.value)
+-  return rankedHospitals.value.filter((item) => item.distanceKm <= radius).slice(0, 5)
++  const nearby = base.filter((item) => item.distanceKm <= radius)
++  return favoritesOnly.value ? nearby : nearby.slice(0, 5)
+ })
+ 
+ function findNearby() {
+@@ -191,9 +198,13 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
+             :locating="locating"
+             :route-loading-id="routeLoadingId"
+             :nearby-active="nearbyActive"
++            :is-favorite="isFavorite"
++            :favorites-count="favoriteIds.size"
+             v-model:distance-filter="distanceFilter"
++            v-model:favorites-only="favoritesOnly"
+             @select="selectHospital"
+             @directions="showRoute"
++            @toggle-favorite="(hospital) => toggleFavorite(hospital.id)"
+           />
+         </div>
+       </div>
