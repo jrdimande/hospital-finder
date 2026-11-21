@@ -61,11 +61,14 @@ button { cursor: pointer; }
 .button-primary { background: var(--blue); color: white; }
 .button-primary:hover:not(:disabled) { background: var(--blue-dark); box-shadow: 0 8px 18px #176f9f33; transform: translateY(-1px); }
 .hero-button { min-height: 54px; padding: 0 20px; font-size: 14px; box-shadow: 0 3px 8px #176f9f20; }
-.hero-button:not(.button-tracking):not(:disabled) { box-shadow: 0 3px 10px #176f9f24; }
-.hero-button:hover, .hero-button:focus-visible { box-shadow: 0 7px 16px #176f9f30; }
+.hero-button:not(.button-tracking):not(:disabled) { animation: nearby-button-pulse 1.4s ease-in-out infinite; }
+.hero-button:hover, .hero-button:focus-visible { animation-play-state: paused; }
 @keyframes nearby-button-pulse {
   0%, 100% { background-color: var(--blue); box-shadow: 0 0 0 0 #176f9f00; }
   50% { background-color: #2587b3; box-shadow: 0 0 0 6px #176f9f30; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-button:not(.button-tracking):not(:disabled) { animation: none; }
 }
 .hero-button.button-tracking { background: #268260; }
 .tracking-indicator { display: inline-block; flex: none; width: 7px; height: 7px; border-radius: 50%; background: #4fc897; box-shadow: 0 0 0 3px #4fc89735; animation: tracking-pulse 1.5s ease-in-out infinite; }

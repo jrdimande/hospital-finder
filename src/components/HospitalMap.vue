@@ -8,6 +8,7 @@ const props = defineProps({
   userLocation: { type: Object, default: null },
   routeMode: { type: String, default: 'car' },
   selectedId: { type: [String, Number], default: null },
+  selectionVersion: { type: Number, default: 0 },
   route: { type: Object, default: null },
   routeLoading: { type: Boolean, default: false },
   routeError: { type: String, default: '' },
@@ -23,8 +24,11 @@ let routeLayer
 let userAccuracyCircle
 let userMarker
 let markerById = new Map()
+let hospitalById = new Map()
 let hasFittedInitialBounds = false
 let renderHospitalsFrame = null
+let lastFollowedPosition = null
+let styledSelectedId = null
 
 function icon(className, symbol) {
   return L.divIcon({
@@ -55,29 +59,53 @@ function facilityStyle(category, selected = false) {
 
 function renderHospitals() {
   if (!map || !hospitalLayer) return
-  const openPopupId = [...markerById.entries()].find(([, marker]) => marker.isPopupOpen())?.[0]
-  hospitalLayer.clearLayers()
-  markerById = new Map()
-
+  const nextHospitals = new Map(props.hospitals.map((hospital) => [hospital.id, hospital]))
+  let selectedMarkerAdded = false
+  markerById.forEach((marker, id) => {
+    if (nextHospitals.has(id)) return
+    hospitalLayer.removeLayer(marker)
+    markerById.delete(id)
+    hospitalById.delete(id)
+  })
   props.hospitals.forEach((hospital) => {
-    const marker = L.circleMarker([hospital.latitude, hospital.longitude], {
-      ...facilityStyle(hospital.category),
-      title: hospital.name,
-      riseOnHover: true,
-    }).bindPopup(() => popupContent(hospital), { closeOnClick: false, closeOnEscapeKey: false })
-    marker.on('click', () => emit('select', hospital))
-    marker.addTo(hospitalLayer)
-    markerById.set(hospital.id, marker)
+    let marker = markerById.get(hospital.id)
+    if (!marker) {
+      marker = L.circleMarker([hospital.latitude, hospital.longitude], {
+        ...facilityStyle(hospital.category),
+        title: hospital.name,
+        riseOnHover: true,
+      }).bindPopup(() => {
+        const currentHospital = hospitalById.get(hospital.id)
+        return currentHospital ? popupContent(currentHospital) : ''
+      }, { closeOnClick: false, closeOnEscapeKey: false })
+      marker.on('click', () => {
+        const selectedHospital = hospitalById.get(hospital.id)
+        if (selectedHospital) emit('select', selectedHospital)
+      })
+      marker.addTo(hospitalLayer)
+      markerById.set(hospital.id, marker)
+      if (hospital.id === props.selectedId) selectedMarkerAdded = true
+    } else {
+      const previousHospital = hospitalById.get(hospital.id)
+      if (previousHospital !== hospital) {
+        marker.setLatLng([hospital.latitude, hospital.longitude])
+        marker.setStyle(facilityStyle(hospital.category, hospital.id === props.selectedId))
+        marker.bindPopup(() => {
+          const currentHospital = hospitalById.get(hospital.id)
+          return currentHospital ? popupContent(currentHospital) : ''
+        }, { closeOnClick: false, closeOnEscapeKey: false })
+      }
+    }
+    hospitalById.set(hospital.id, hospital)
   })
 
   updateSelectedMarker()
-  const openPopupMarker = markerById.get(openPopupId)
-  if (openPopupMarker) openPopupMarker.openPopup()
   const points = props.hospitals.map(({ latitude, longitude }) => [latitude, longitude])
   if (points.length && !props.userLocation && !hasFittedInitialBounds) {
     map.fitBounds(points, { padding: [42, 42], maxZoom: 7 })
     hasFittedInitialBounds = true
   }
+  if (selectedMarkerAdded) openSelectedPopup()
 }
 
 function popupContent(hospital) {
@@ -117,11 +145,32 @@ function escapeHtml(value) {
 }
 
 function updateSelectedMarker() {
-  markerById.forEach((marker, id) => {
-    const selected = id === props.selectedId
-    const hospital = props.hospitals.find((item) => item.id === id)
-    if (hospital) marker.setStyle(facilityStyle(hospital.category, selected))
-  })
+  if (styledSelectedId === props.selectedId) {
+    const marker = markerById.get(props.selectedId)
+    const hospital = hospitalById.get(props.selectedId)
+    if (marker && hospital) marker.setStyle(facilityStyle(hospital.category, true))
+    return
+  }
+  if (styledSelectedId !== null) {
+    const previousMarker = markerById.get(styledSelectedId)
+    const previousHospital = hospitalById.get(styledSelectedId)
+    if (previousMarker && previousHospital) {
+      previousMarker.setStyle(facilityStyle(previousHospital.category))
+    }
+  }
+  const selectedMarker = markerById.get(props.selectedId)
+  const selectedHospital = hospitalById.get(props.selectedId)
+  if (selectedMarker && selectedHospital) {
+    selectedMarker.setStyle(facilityStyle(selectedHospital.category, true))
+    styledSelectedId = props.selectedId
+  } else {
+    styledSelectedId = null
+  }
+}
+
+function openSelectedPopup() {
+  const marker = markerById.get(props.selectedId)
+  if (marker && map) marker.openPopup()
 }
 
 function updateUserMarker(location) {
@@ -154,12 +203,13 @@ function updateUserMarker(location) {
     userAccuracyCircle.setLatLng(position).setRadius(location.accuracy || 30)
   }
 
-  if (props.followLocation) {
-    if (isFirstPosition) {
-      map.setView(position, Math.max(map.getZoom(), 15), { animate: false })
-    } else {
-      map.panTo(position, { animate: false })
-    }
+  if (!props.followLocation) return
+  const movedMeters = lastFollowedPosition
+    ? map.distance(lastFollowedPosition, position)
+    : Infinity
+  if (isFirstPosition || movedMeters >= 35) {
+    lastFollowedPosition = L.latLng(position)
+    map.setView(position, Math.max(map.getZoom(), 15), { animate: false })
   }
 }
 
@@ -195,6 +245,9 @@ onMounted(() => {
   userLayer = L.layerGroup().addTo(map)
   routeLayer = L.layerGroup().addTo(map)
   renderHospitals()
+  updateUserMarker(props.userLocation)
+  renderRoute(props.route)
+  openSelectedPopup()
   const resizeObserver = new ResizeObserver(() => map?.invalidateSize({ pan: false }))
   resizeObserver.observe(mapElement.value)
   map.once('unload', () => resizeObserver.disconnect())
@@ -212,6 +265,7 @@ watch(() => props.userLocation, updateUserMarker)
 
 watch(() => props.followLocation, (following) => {
   if (following && props.userLocation && map) {
+    lastFollowedPosition = L.latLng(props.userLocation.latitude, props.userLocation.longitude)
     map.setView(
       [props.userLocation.latitude, props.userLocation.longitude],
       Math.max(map.getZoom(), 15),
@@ -220,7 +274,7 @@ watch(() => props.followLocation, (following) => {
   }
 })
 
-watch(() => props.selectedId, (selectedId) => {
+function focusSelectedMarker(selectedId = props.selectedId) {
   updateSelectedMarker()
   const marker = markerById.get(selectedId)
   if (marker && map) {
@@ -231,7 +285,10 @@ watch(() => props.selectedId, (selectedId) => {
     }
     marker.openPopup()
   }
-})
+}
+
+watch(() => props.selectedId, focusSelectedMarker)
+watch(() => props.selectionVersion, () => focusSelectedMarker())
 
 watch(() => props.route, renderRoute)
 

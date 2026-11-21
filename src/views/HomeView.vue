@@ -22,6 +22,7 @@ const { location, locating, tracking, error: locationError, locate } = useGeoloc
 const searchQuery = ref('')
 const nearbyActive = ref(false)
 const selectedId = ref(null)
+const selectionVersion = ref(0)
 const showAllResults = ref(false)
 const pendingRouteHospital = ref(null)
 const pendingRouteScroll = ref(false)
@@ -185,6 +186,7 @@ function findNearby() {
 
 function selectHospital(hospital, { scroll = true } = {}) {
   selectedId.value = hospital.id
+  selectionVersion.value += 1
   if (route.value?.hospitalId !== hospital.id) {
     routeRequestId += 1
     route.value = null
@@ -378,6 +380,7 @@ onBeforeUnmount(() => {
               :user-location="location"
               :route-mode="routeMode"
               :selected-id="selectedId"
+              :selection-version="selectionVersion"
               :route="route"
               :route-loading="Boolean(routeLoadingId)"
               :route-error="routeError"
