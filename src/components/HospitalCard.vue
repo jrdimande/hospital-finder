@@ -9,9 +9,10 @@ const props = defineProps({
   selected: { type: Boolean, default: false },
   hasUserLocation: { type: Boolean, default: false },
   routeLoading: { type: Boolean, default: false },
+  isFavorite: { type: Boolean, default: false },
 })
 
-defineEmits(['select', 'directions'])
+defineEmits(['select', 'directions', 'toggle-favorite'])
 
 const fields = computed(() => {
   const properties = props.hospital.properties
@@ -31,10 +32,23 @@ const detailFields = computed(() => Object.entries(props.hospital.properties)
 <template>
   <article class="hospital-card" :class="{ 'is-selected': selected }">
     <div class="card-topline">
-      <span class="hospital-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M4 21V5h16v16M2 21h20M9 9h6M12 6v6M8 16h.01M16 16h.01"/></svg>
+      <span class="card-topline-left">
+        <span class="hospital-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 21V5h16v16M2 21h20M9 9h6M12 6v6M8 16h.01M16 16h.01"/></svg>
+        </span>
+        <span v-if="distanceKm !== null" class="distance-pill">{{ formatDistance(distanceKm) }}</span>
       </span>
-      <span v-if="distanceKm !== null" class="distance-pill">{{ formatDistance(distanceKm) }}</span>
+      <button
+        type="button"
+        class="favorite-toggle"
+        :class="{ 'is-active': isFavorite }"
+        :aria-pressed="isFavorite"
+        :title="isFavorite ? 'Remover dos favoritos' : 'Guardar nos favoritos'"
+        @click="$emit('toggle-favorite', hospital)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.35-9.5-8.5C.8 8.1 2.2 4.5 6 4a5 5 0 0 1 6 2 5 5 0 0 1 6-2c3.8.5 5.2 4.1 3.5 7.5C19 15.65 12 20 12 20Z"/></svg>
+        <span class="sr-only">{{ isFavorite ? 'Remover dos favoritos' : 'Guardar nos favoritos' }}</span>
+      </button>
     </div>
     <h3>{{ hospital.name }}</h3>
     <p v-if="hospital.type" class="hospital-type">{{ hospital.type }}</p>

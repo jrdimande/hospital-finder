@@ -7,6 +7,7 @@ import HospitalMap from '../components/HospitalMap.vue'
 import LoadingState from '../components/LoadingState.vue'
 import Navbar from '../components/Navbar.vue'
 import SearchBar from '../components/SearchBar.vue'
+import { useFavorites } from '../composables/useFavorites'
 import { useGeolocation } from '../composables/useGeolocation'
 import { useHospitals } from '../composables/useHospitals'
 import { fetchDrivingRoute } from '../services/routingService'
@@ -14,10 +15,12 @@ import { haversineDistanceKm } from '../utils/distance'
 
 const { hospitals, loading, error, updatedAt, provinces, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
+const { favoriteIds, isFavorite, toggleFavorite } = useFavorites()
 const searchQuery = ref('')
 const selectedProvince = ref('')
 const distanceFilter = ref('all')
 const nearbyActive = ref(false)
+const favoritesOnly = ref(false)
 const selectedId = ref(null)
 const route = ref(null)
 const routeError = ref('')
@@ -51,9 +54,13 @@ const rankedHospitals = computed(() => searchedHospitals.value
   }))
 
 const visibleHospitals = computed(() => {
-  if (!nearbyActive.value) return rankedHospitals.value.slice(0, 6)
+  const base = favoritesOnly.value
+    ? rankedHospitals.value.filter((item) => isFavorite(item.hospital.id))
+    : rankedHospitals.value
+  if (!nearbyActive.value) return favoritesOnly.value ? base : base.slice(0, 6)
   const radius = distanceFilter.value === 'all' ? Infinity : Number(distanceFilter.value)
-  return rankedHospitals.value.filter((item) => item.distanceKm <= radius).slice(0, 5)
+  const nearby = base.filter((item) => item.distanceKm <= radius)
+  return favoritesOnly.value ? nearby : nearby.slice(0, 5)
 })
 
 function findNearby() {
@@ -191,9 +198,13 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
             :locating="locating"
             :route-loading-id="routeLoadingId"
             :nearby-active="nearbyActive"
+            :is-favorite="isFavorite"
+            :favorites-count="favoriteIds.size"
             v-model:distance-filter="distanceFilter"
+            v-model:favorites-only="favoritesOnly"
             @select="selectHospital"
             @directions="showRoute"
+            @toggle-favorite="(hospital) => toggleFavorite(hospital.id)"
           />
         </div>
       </div>
