@@ -21,6 +21,7 @@ const { hospitals, loading, error, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
 const searchQuery = ref('')
 const nearbyActive = ref(false)
+const nearbyProgress = ref('')
 const selectedId = ref(null)
 const selectionVersion = ref(0)
 const showAllResults = ref(false)
@@ -176,6 +177,9 @@ function findNearby() {
   nearbyActive.value = true
   showAllResults.value = false
   autoRoutePending.value = !stoppingTracking
+  nearbyProgress.value = stoppingTracking
+    ? ''
+    : 'A obter a sua localização para encontrar unidades próximas…'
   if (!stoppingTracking) {
     requestAnimationFrame(() => {
       document.querySelector('#mapa')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -199,6 +203,9 @@ function selectHospital(hospital, { scroll = true } = {}) {
 async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
   autoRoutePending.value = false
   if (!automatic) automaticRouteQueue.value = []
+  nearbyProgress.value = automatic
+    ? `A traçar rota para ${hospital.name}…`
+    : ''
   selectHospital(hospital, { scroll })
   if (!location.value) {
     pendingRouteHospital.value = hospital
@@ -228,6 +235,7 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
       destinationName: hospital.name,
       origin,
     }
+    nearbyProgress.value = ''
     if (automatic) automaticRouteQueue.value = []
   } catch (error) {
     if (requestId === routeRequestId) {
@@ -239,6 +247,7 @@ async function showRoute(hospital, { scroll = true, automatic = false } = {}) {
         showRoute(nextHospital, { scroll: false, automatic: true })
       } else {
         automaticRouteQueue.value = []
+        nearbyProgress.value = ''
         routeError.value = automatic && message.includes('Não foi possível encontrar uma rota para esta unidade')
           ? 'Não foi encontrada uma rota para as unidades disponíveis próximas de si. Escolha outra unidade na lista para tentar novamente.'
           : message
@@ -261,6 +270,7 @@ function clearRoute() {
   route.value = null
   routeError.value = ''
   routeLoadingId.value = null
+  nearbyProgress.value = ''
 }
 
 function retryRoute() {
@@ -279,10 +289,12 @@ watch(location, (currentLocation) => {
   }
   if (autoRoutePending.value && currentLocation) {
     autoRoutePending.value = false
+    nearbyProgress.value = 'A procurar a unidade sanitária mais próxima…'
     const nearestHospitals = matchingHospitals.value.map((item) => item.hospital)
     const nearestHospital = nearestHospitals.shift()
     automaticRouteQueue.value = nearestHospitals
     if (nearestHospital) showRoute(nearestHospital, { scroll: false, automatic: true })
+    else nearbyProgress.value = ''
     return
   }
   if (!tracking.value || !route.value || !currentLocation) return
@@ -293,6 +305,10 @@ watch(location, (currentLocation) => {
     const destination = [...hospitals.value, ...mapPlaces.value].find((hospital) => hospital.id === route.value?.hospitalId)
     if (destination) showRoute(destination, { scroll: false })
   }, 1200)
+})
+
+watch(locationError, (message) => {
+  if (message) nearbyProgress.value = ''
 })
 
 onMounted(() => {
@@ -369,6 +385,10 @@ onBeforeUnmount(() => {
                 </label>
                 <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }}</span>
               </div>
+            </div>
+            <div v-if="nearbyProgress" class="map-progress-status" role="status" aria-live="polite">
+              <span class="loading-spinner" aria-hidden="true"></span>
+              <span>{{ nearbyProgress }}</span>
             </div>
             <div v-if="!mapLoaded" class="map-loading-placeholder" role="status">
               <span class="loading-spinner" aria-hidden="true"></span>

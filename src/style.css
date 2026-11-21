@@ -144,6 +144,8 @@ button { cursor: pointer; }
 .map-layout { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; margin-top: 23px; }
 .map-panel, .results-section { background: white; border: 1px solid #e7eef1; border-radius: 10px; box-shadow: 0 6px 24px #17364b07; overflow: hidden; }
 .map-panel-header { position: relative; z-index: 5; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 16px; border-bottom: 1px solid #edf1f2; }
+.map-progress-status { display: flex; align-items: center; gap: 10px; min-height: 43px; padding: 9px 16px; border-bottom: 1px solid #e6eef1; background: #f5fafb; color: #426779; font-size: 12px; line-height: 1.45; }
+.map-progress-status .loading-spinner { width: 17px; height: 17px; flex: none; }
 .map-panel-header > div:first-child { min-width: 0; }
 .map-panel-header > div { display: flex; align-items: center; gap: 9px; }
 .map-panel-header strong { color: #345065; font-size: 13px; }
