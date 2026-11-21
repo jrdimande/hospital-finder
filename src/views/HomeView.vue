@@ -1,9 +1,8 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ComplaintSection from '../components/ComplaintSection.vue'
 import HeroSection from '../components/HeroSection.vue'
 import HospitalList from '../components/HospitalList.vue'
-import HospitalMap from '../components/HospitalMap.vue'
 import LoadingState from '../components/LoadingState.vue'
 import BrandMark from '../components/BrandMark.vue'
 import Navbar from '../components/Navbar.vue'
@@ -13,6 +12,10 @@ import { useHospitals } from '../composables/useHospitals'
 import { searchMapPlaces } from '../services/placeSearchService'
 import { fetchRoute } from '../services/routingService'
 import { haversineDistanceKm } from '../utils/distance'
+
+const HospitalMap = defineAsyncComponent(() =>
+  import('../components/HospitalMap.vue'),
+)
 
 const { hospitals, loading, error, reload } = useHospitals()
 const { location, locating, tracking, error: locationError, locate } = useGeolocation()
@@ -35,40 +38,53 @@ const routeError = ref('')
 const routeLoadingId = ref(null)
 let routeRequestId = 0
 let rerouteTimer = null
+const mapRoot = ref(null)
+const mapLoaded = ref(false)
+let mapObserver = null
+
+const hospitalSearchIndex = computed(() =>
+  hospitals.value.map((hospital) => {
+    const location = [
+      hospital.properties.PostoAdministrativo,
+      hospital.properties.Distrito,
+      hospital.properties.Provincia,
+    ].filter((value, index, values) => value && values.indexOf(value) === index).join(', ')
+    return {
+      hospital,
+      name: hospital.name,
+      type: hospital.type,
+      location,
+      searchable: [hospital.name, hospital.type, location]
+        .filter(Boolean)
+        .join(' ')
+        .toLocaleLowerCase('pt'),
+    }
+  }),
+)
 
 const searchedHospitals = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase('pt')
-  return hospitals.value.filter((hospital) => {
-    const searchable = [
-      hospital.name,
-      hospital.type,
-      hospital.properties.Provincia,
-      hospital.properties.Distrito,
-      hospital.properties.PostoAdministrativo,
-    ].filter(Boolean).join(' ').toLocaleLowerCase('pt')
-    return !query || searchable.includes(query)
-  })
+  if (!query) return hospitals.value
+  return hospitalSearchIndex.value
+    .filter((item) => item.searchable.includes(query))
+    .map((item) => item.hospital)
 })
 
 const searchSuggestions = computed(() => {
   const query = searchQuery.value.trim().toLocaleLowerCase('pt')
   if (query.length < 2) return []
 
-  return hospitals.value
-    .map((hospital) => {
-      const location = [hospital.properties.PostoAdministrativo, hospital.properties.Distrito, hospital.properties.Provincia]
-        .filter((value, index, values) => value && values.indexOf(value) === index)
-        .join(', ')
-      return {
-        id: hospital.id,
-        name: hospital.name,
-        type: hospital.type,
-        location,
-        searchable: [hospital.name, hospital.type, location].filter(Boolean).join(' ').toLocaleLowerCase('pt'),
-      }
-    })
-    .filter((suggestion) => suggestion.searchable.includes(query))
-    .sort((a, b) => Number(!a.name.toLocaleLowerCase('pt').startsWith(query)) - Number(!b.name.toLocaleLowerCase('pt').startsWith(query)))
+  return hospitalSearchIndex.value
+    .filter((item) => item.searchable.includes(query))
+    .sort((a, b) =>
+      Number(!a.name.toLocaleLowerCase('pt').startsWith(query)) -
+      Number(!b.name.toLocaleLowerCase('pt').startsWith(query)))
+    .map((item) => ({
+      id: item.hospital.id,
+      name: item.name,
+      type: item.type,
+      location: item.location,
+    }))
     .slice(0, 6)
 })
 
@@ -277,7 +293,24 @@ watch(location, (currentLocation) => {
   }, 1200)
 })
 
-onBeforeUnmount(() => clearTimeout(rerouteTimer))
+onMounted(() => {
+  if (!mapRoot.value) return
+  if (!('IntersectionObserver' in window)) {
+    mapLoaded.value = true
+    return
+  }
+  mapObserver = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return
+    mapLoaded.value = true
+    mapObserver?.disconnect()
+  }, { rootMargin: '300px 0px', threshold: 0.01 })
+  mapObserver.observe(mapRoot.value)
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(rerouteTimer)
+  mapObserver?.disconnect()
+})
 </script>
 
 <template>
@@ -320,7 +353,7 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
         <LoadingState v-if="loading" />
 
         <div class="map-layout">
-          <div id="mapa" class="map-panel">
+          <div id="mapa" ref="mapRoot" class="map-panel">
             <div class="map-panel-header">
               <div><span class="map-live-dot"></span><strong>Mapa de unidades sanitárias</strong></div>
               <div class="map-header-actions">
@@ -335,7 +368,12 @@ onBeforeUnmount(() => clearTimeout(rerouteTimer))
                 <span v-if="hospitals.length || mapPlaces.length" class="map-total">{{ hasActiveFilters ? `${matchingHospitals.length} resultados` : `${hospitals.length} unidades` }}</span>
               </div>
             </div>
+            <div v-if="!mapLoaded" class="map-loading-placeholder" role="status">
+              <span class="loading-spinner" aria-hidden="true"></span>
+              A preparar o mapa…
+            </div>
             <HospitalMap
+              v-else
               :hospitals="(nearbyActive ? matchingHospitals : rankedHospitals).map((item) => item.hospital)"
               :user-location="location"
               :route-mode="routeMode"

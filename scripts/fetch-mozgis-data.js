@@ -10,6 +10,22 @@ const LAYERS = [
   { id: 6, category: 'Centro de Saúde' },
   { id: 7, category: 'Posto de Saúde' },
 ]
+const COMPACT_PROPERTY_NAMES = [
+  'OBJECTID',
+  'Nome',
+  'Tipo',
+  'AutoridadeGestora',
+  'DescricaoAutoridadeGestora',
+  'AreaLocalizacao',
+  'Latitude',
+  'Longitude',
+  'ContactoResponsavel',
+  'UnidadeSanitariaRef',
+  'Provincia',
+  'Distrito',
+  'PostoAdministrativo',
+  'Endereco',
+]
 
 async function fetchLayer({ id, category }) {
   const url = `${SERVICE_URL}/${id}/query?where=1%3D1&outFields=*&returnGeometry=true&f=geojson`
@@ -35,11 +51,21 @@ async function fetchLayer({ id, category }) {
       Number.isFinite(feature.geometry.coordinates[1]) &&
       feature.properties &&
       typeof feature.properties === 'object')
-    .map((feature, index) => ({
-      ...feature,
-      id: `${id}:${feature.id ?? feature.properties.OBJECTID ?? index}`,
-      category,
-    }))
+    .map((feature, index) => {
+      const compactProperties = Object.fromEntries(
+        COMPACT_PROPERTY_NAMES
+          .filter((name) => feature.properties[name] !== undefined &&
+            feature.properties[name] !== null &&
+            feature.properties[name] !== '')
+          .map((name) => [name, feature.properties[name]]),
+      )
+      return {
+        ...feature,
+        properties: compactProperties,
+        id: `${id}:${feature.id ?? compactProperties.OBJECTID ?? index}`,
+        category,
+      }
+    })
 
   if (!features.length) {
     throw new Error(`A camada ${category} não contém unidades com coordenadas válidas.`)

@@ -24,6 +24,7 @@ let userAccuracyCircle
 let userMarker
 let markerById = new Map()
 let hasFittedInitialBounds = false
+let renderHospitalsFrame = null
 
 function icon(className, symbol) {
   return L.divIcon({
@@ -35,21 +36,21 @@ function icon(className, symbol) {
   })
 }
 
-function facilityIcon(category, selected = false) {
-  const typeClass = category === 'Hospital'
-    ? 'facility-hospital'
+function facilityStyle(category, selected = false) {
+  const color = category === 'Hospital'
+    ? '#df514d'
     : category === 'Centro de Saúde'
-      ? 'facility-center'
+      ? '#279b76'
       : category === 'MapSearch'
-        ? 'facility-search'
-        : 'facility-post'
-  return L.divIcon({
-    className: 'facility-map-icon',
-    html: `<span class="facility-dot ${typeClass}${selected ? ' selected' : ''}"></span>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -10],
-  })
+        ? '#2585c2'
+        : '#e29a34'
+  return {
+    radius: selected ? 9 : 6,
+    color: selected ? '#17364b' : '#ffffff',
+    weight: selected ? 3 : 2,
+    fillColor: color,
+    fillOpacity: 1,
+  }
 }
 
 function renderHospitals() {
@@ -59,8 +60,8 @@ function renderHospitals() {
   markerById = new Map()
 
   props.hospitals.forEach((hospital) => {
-    const marker = L.marker([hospital.latitude, hospital.longitude], {
-      icon: facilityIcon(hospital.category),
+    const marker = L.circleMarker([hospital.latitude, hospital.longitude], {
+      ...facilityStyle(hospital.category),
       title: hospital.name,
       riseOnHover: true,
     }).bindPopup(() => popupContent(hospital), { closeOnClick: false, closeOnEscapeKey: false })
@@ -119,7 +120,7 @@ function updateSelectedMarker() {
   markerById.forEach((marker, id) => {
     const selected = id === props.selectedId
     const hospital = props.hospitals.find((item) => item.id === id)
-    marker.setIcon(facilityIcon(hospital?.category, selected))
+    if (hospital) marker.setStyle(facilityStyle(hospital.category, selected))
   })
 }
 
@@ -178,13 +179,17 @@ onMounted(() => {
     scrollWheelZoom: false,
     touchZoom: true,
     preferCanvas: true,
+    zoomAnimation: false,
+    fadeAnimation: false,
+    markerZoomAnimation: false,
+    renderer: L.canvas({ padding: 0.5 }),
   }).setView([-18.6, 35.5], 5)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
     updateWhenIdle: true,
     updateWhenZooming: false,
-    keepBuffer: 2,
+    keepBuffer: 1,
   }).addTo(map)
   hospitalLayer = L.layerGroup().addTo(map)
   userLayer = L.layerGroup().addTo(map)
@@ -195,7 +200,13 @@ onMounted(() => {
   map.once('unload', () => resizeObserver.disconnect())
 })
 
-watch(() => props.hospitals, renderHospitals)
+watch(() => props.hospitals, () => {
+  if (renderHospitalsFrame !== null) cancelAnimationFrame(renderHospitalsFrame)
+  renderHospitalsFrame = requestAnimationFrame(() => {
+    renderHospitalsFrame = null
+    renderHospitals()
+  })
+})
 
 watch(() => props.userLocation, updateUserMarker)
 
@@ -225,6 +236,7 @@ watch(() => props.selectedId, (selectedId) => {
 watch(() => props.route, renderRoute)
 
 onBeforeUnmount(() => {
+  if (renderHospitalsFrame !== null) cancelAnimationFrame(renderHospitalsFrame)
   map?.remove()
 })
 
