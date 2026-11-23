@@ -163,8 +163,6 @@ button { cursor: pointer; }
 .map-recenter svg { width: 16px; height: 16px; fill: none; stroke: var(--blue); stroke-width: 1.7; }
 .map-legend { min-height: 49px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 10px 15px; color: #718594; font-size: 9px; border-top: 1px solid #eff2f3; }
 .map-legend > span { display: flex; align-items: center; gap: 6px; }
-.map-legend small { color: #99a6ae; font-size: 9px; margin-left: auto; }
-.map-legend small a { color: var(--blue); text-decoration: underline; }
 .legend-dot { width: 8px; height: 8px; display: inline-block; border-radius: 50%; }
 .hospital-dot { background: #e65d59; }
 .center-dot { background: #279b76; }
@@ -248,7 +246,6 @@ button { cursor: pointer; }
 .map-feedback { font-size: 12px; }
 .map-recenter { min-height: 42px; font-size: 12px; }
 .map-legend { font-size: 11px; }
-.map-legend small { font-size: 10px; }
 .results-heading .section-kicker { font-size: 9px; }
 .results-heading h2 { font-size: 19px; }
 .results-heading p, .result-count { font-size: 11px; }
@@ -371,7 +368,6 @@ button { cursor: pointer; }
   .map-recenter { top: 9px; right: 9px; padding: 8px; }
   .map-recenter span { display: none; }
   .map-legend { gap: 11px; }
-  .map-legend small { flex-basis: 100%; margin-left: 0; }
   .hospital-list { grid-template-columns: 1fr; }
   .results-section { padding: 14px 11px; }
   .map-panel-header { align-items: flex-start; flex-wrap: wrap; padding: 8px 10px; }

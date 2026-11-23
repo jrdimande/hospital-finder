@@ -415,7 +415,6 @@ onBeforeUnmount(() => {
               <span><i class="legend-dot post-dot"></i> Posto de saúde</span>
               <span v-if="mapPlaces.length"><i class="legend-dot search-result-dot"></i> Local pesquisado</span>
               <span><i class="legend-dot user-dot"></i> Posição GPS</span>
-              <small>Rotas: <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noreferrer">OSRM/FOSSGIS</a> · dados OSM (<a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">corrigir mapa</a>)</small>
             </div>
           </div>
           <HospitalList
