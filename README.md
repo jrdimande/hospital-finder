@@ -1,163 +1,131 @@
 # Saúde Perto
 
-Aplicação web para localizar hospitais, centros de saúde e postos de saúde em Moçambique. Reunimos dados geográficos do MozGIS num mapa interactivo e disponibilizamos pesquisa, informação de proximidade e cálculo de rotas.
+**Saúde Perto** é uma aplicação web para localizar hospitais, centros de saúde e postos de saúde em Moçambique. A plataforma combina dados geográficos, pesquisa interactiva e mapas para ajudar utilizadores a encontrar unidades sanitárias próximas e consultar a melhor forma de chegar até elas.
 
-**Código-fonte:** [github.com/jrdimande/hospital-finder](https://github.com/jrdimande/hospital-finder)<br>
-**Aplicação:** [jrdimande.github.io/hospital-finder](https://jrdimande.github.io/hospital-finder/)
+[Aplicação publicada](https://jrdimande.github.io/hospital-finder/) · [Código-fonte](https://github.com/jrdimande/hospital-finder)
 
-## Objectivo
+> [!IMPORTANT]
+> Esta aplicação é uma ferramenta informativa. Não substitui os serviços de emergência e não confirma horários, disponibilidade de vagas ou serviços clínicos.
 
-Encontrar uma unidade sanitária, perceber onde fica e obter indicações para chegar até ela pode ser difícil quando não se conhece a localidade ou as opções disponíveis nas proximidades. O Saúde Perto reúne informação geográfica para facilitar essa pesquisa.
+## Índice
 
-O utilizador pode procurar unidades por nome ou localização, consultar os resultados no mapa e, se autorizar o acesso à localização, ordenar as unidades por distância e pedir uma rota. Quando existe um contacto nos dados, a aplicação disponibiliza uma ligação para chamada.
-
-> **Nota:** O Saúde Perto é uma ferramenta informativa. Não substitui os serviços de emergência e não confirma horários, disponibilidade ou serviços clínicos.
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Arquitectura](#arquitectura)
+- [Fontes de dados](#fontes-de-dados)
+- [Instalação e execução](#instalação-e-execução)
+- [Configuração do EmailJS](#configuração-do-emailjs)
+- [Publicação](#publicação)
+- [Privacidade e limitações](#privacidade-e-limitações)
+- [Testes](#testes)
+- [Estrutura do projecto](#estrutura-do-projecto)
+- [Equipa](#equipa)
+- [Licenças e créditos](#licenças-e-créditos)
 
 ## Funcionalidades
 
-| Área | Funcionalidade |
+- Pesquisa de unidades por nome, tipo, província, distrito ou posto administrativo.
+- Sugestões de pesquisa durante a escrita.
+- Pesquisa de localidades no OpenStreetMap/Nominatim.
+- Mapa interactivo com marcadores para hospitais, centros de saúde, postos de saúde e locais externos.
+- Cálculo de distância em linha recta a partir da localização do utilizador.
+- Ordenação dos resultados por proximidade.
+- Cálculo de rotas a pé, de carro ou de mota através do OSRM/FOSSGIS.
+- Navegação externa para o destino no Google Maps.
+- Ligações telefónicas quando existe um contacto válido.
+- Envio de reclamações sobre dados, mapa, rotas e problemas técnicos.
+- Estados visuais para carregamento, erro, pesquisa em curso e ausência de resultados.
+
+Os locais encontrados no Nominatim podem não corresponder a unidades sanitárias oficiais. Estes resultados são apresentados separadamente dos registos MozGIS.
+
+## Tecnologias
+
+| Categoria | Tecnologia |
 |:--|:--|
-| Pesquisa | Pesquisa de unidades por nome, tipo, província, distrito e posto administrativo, com sugestões enquanto se escreve. |
-| Pesquisa geográfica | Pesquisa de localidades no OpenStreetMap/Nominatim quando não há correspondências nos dados MozGIS. |
-| Mapa | Mapa interactivo com marcadores diferenciados para hospitais, centros de saúde, postos de saúde e locais externos encontrados. |
-| Informação | Consulta dos dados disponíveis da unidade, incluindo localização e contacto, quando fornecidos pela fonte. |
-| Localização | Pedido de localização ao navegador mediante acção do utilizador e acompanhamento opcional da posição. |
-| Proximidade | Ordenação de unidades por distância quando a posição está disponível. |
-| Rotas | Trajectos a pé, de carro ou de mota, com distância e duração estimadas. |
-| Navegação e contacto | Ligações para abrir o destino no Google Maps e para iniciar uma chamada quando o contacto pode ser convertido em ligação telefónica. |
-| Reclamações | Formulário para comunicar dados incorrectos, problemas de mapa ou rota, problemas técnicos ou outros assuntos. |
-| Estados da interface | Indicadores de carregamento, localização e cálculo de rota, mensagens de erro, tentativa de novo carregamento e estados sem resultados. |
+| Interface | Vue 3 |
+| Build e desenvolvimento | Vite 6 |
+| Mapa interactivo | Leaflet 1.9 |
+| Formulário de contacto | EmailJS Browser SDK |
+| Hospedagem | GitHub Pages |
+| Integração e entrega | GitHub Actions |
 
-## Utilização
+### Dependências principais
 
-1. Pesquise pelo nome de uma unidade, tipo ou localidade.
-2. Consulte os resultados na lista ou seleccione um marcador no mapa para abrir os detalhes disponíveis.
-3. Para encontrar unidades próximas ou calcular uma rota, autorize a localização quando o navegador a solicitar.
-4. Escolha o modo de deslocação. A aplicação apresenta a rota, distância e duração estimada; também pode abrir o destino no Google Maps.
-5. Se encontrar um problema, pode comunicá-lo através do formulário de reclamações.
+```text
+Vue 3
+Vite
+@vitejs/plugin-vue
+Leaflet
+@emailjs/browser
+```
 
-O mapa permite seleccionar uma unidade e consultar um popup com os dados disponíveis. A pesquisa por texto consulta primeiro as unidades MozGIS; quando não encontra correspondências, procura locais adicionais no OpenStreetMap.
+As versões exactas das dependências estão definidas em `package.json` e `package-lock.json`.
 
-## Ecrãs e navegação
+## Arquitetura
 
-O projecto não utiliza Vue Router. `src/App.vue` selecciona a página através do fragmento (`hash`) da URL e do evento `hashchange`. Não há rotas com parâmetros nem uma página 404 dedicada.
+O frontend Vue é executado no navegador. Durante o build de produção, o GitHub Actions executa um script que recolhe as unidades sanitárias do MozGIS e gera um ficheiro GeoJSON estático.
 
-| URL ou fragmento | Conteúdo |
-|:--|:--|
-| `/` | Página principal, com apresentação, pesquisa, mapa, resultados e reclamações. |
-| `#inicio` | Apresentação e opção para procurar unidades próximas. |
-| `#encontrar` | Área de pesquisa, mapa e lista de unidades. |
-| `#mapa` | Painel do mapa interactivo. |
-| `#reclamar` | Formulário de reclamações na página principal. |
-| `#contacto` | Rodapé com fontes e ligações informativas. |
-| `#/info` | Página Sobre, com informação sobre o projecto, as fontes e a geração dos dados. |
+```mermaid
+flowchart LR
+    A[GitHub Actions] --> B[Script de recolha]
+    B --> C[GeoJSON estático]
+    C --> D[Build Vite]
+    D --> E[GitHub Pages]
+    F[MozGIS] --> B
+    E --> G[Navegador]
+    G --> H[Vue 3]
+    H --> I[Leaflet]
+    I --> J[OpenStreetMap]
+    H --> K[Nominatim]
+    H --> L[OSRM/FOSSGIS]
+    H --> M[EmailJS]
+```
 
-Os fragmentos de secção são âncoras da página principal. Um fragmento no formato `#/...` que não seja `#/info` apresenta a página principal.
+O ficheiro `public/data/unidades.geojson` é gerado durante o build e não é mantido no repositório.
 
-## Dados e serviços externos
+## Fontes de dados
 
 ### Unidades sanitárias
 
-Obtemos os dados do serviço geográfico público do MozGIS:
+Os dados geográficos das unidades sanitárias são obtidos do serviço público MozGIS:
 
 ```text
 https://www.mozgis.gov.mz/server/rest/services/MEF/MEFAAPUnidadesSanitarias/MapServer
 ```
 
-O script `scripts/fetch-mozgis-data.js` descarrega as seguintes camadas durante o build:
+O script `scripts/fetch-mozgis-data.js` recolhe as seguintes camadas:
 
-| Camada | Categoria |
-|:--|:--|
+| ID | Categoria |
+|:--:|:--|
 | 5 | Hospital |
 | 6 | Centro de Saúde |
 | 7 | Posto de Saúde |
 
-O build valida as geometrias e coordenadas, selecciona propriedades usadas pela aplicação e gera `public/data/unidades.geojson`. Esse ficheiro é ignorado pelo Git e criado novamente em cada publicação. Em produção, `src/services/hospitalService.js` lê o GeoJSON estático do próprio site. A data de geração incluída no ficheiro é apresentada na página Sobre e corresponde à da última publicação, não à data de verificação no terreno.
+O script valida geometrias e coordenadas, selecciona os atributos relevantes e gera `public/data/unidades.geojson`.
 
-O navegador não consulta directamente o serviço MozGIS em produção, evitando depender do acesso CORS do serviço no dispositivo de cada utilizador. Em desenvolvimento, o proxy do Vite encaminha pedidos a `/api/mozgis` para o serviço MozGIS. Durante o build, o script executado em Node descarrega os dados e prepara o ficheiro estático que será publicado.
+Em produção, o navegador lê o GeoJSON publicado junto da aplicação. Em desenvolvimento, o proxy do Vite encaminha `/api/mozgis` para o serviço MozGIS.
 
-### Mapa, pesquisa e rotas
+### Serviços externos
 
 | Serviço | Utilização |
 |:--|:--|
-| OpenStreetMap | Mosaicos do mapa e dados geográficos. A base de dados é disponibilizada sob a Open Database Licence (ODbL); mantemos a atribuição aos contribuidores apresentada no mapa. |
-| Nominatim | Pesquisa de localidades em Moçambique quando não há correspondências nos dados das unidades sanitárias. |
-| OSRM/FOSSGIS | Cálculo de rotas. O modo a pé usa o perfil pedonal; carro e mota usam o perfil rodoviário de carro. |
-| Google Maps | Navegação externa para o destino seleccionado. |
+| OpenStreetMap | Mosaicos cartográficos e dados geográficos |
+| Nominatim | Pesquisa de localidades em Moçambique |
+| OSRM/FOSSGIS | Cálculo de distância e percurso |
+| Google Maps | Navegação até ao destino |
+| EmailJS | Envio do formulário de reclamações |
 
-**Tratamento dos dados:** A aplicação apresenta estados de carregamento, erro e lista vazia. Em desenvolvimento, pode apresentar dados das camadas carregadas e indicar uma falha parcial de outra camada. Para o build de produção, o script tem de descarregar com sucesso as três camadas. Os registos podem estar incompletos ou desactualizados; horários e disponibilidade devem ser confirmados directamente junto da unidade.
+A disponibilidade dos serviços externos depende dos respectivos fornecedores e pode estar sujeita a limites de utilização, indisponibilidade ou alterações nos termos de serviço.
 
-## Arquitectura
+## Instalação e execução
 
-O frontend é executado no navegador. No build, o GitHub Actions descarrega os dados MozGIS e prepara o GeoJSON, que é publicado junto da aplicação no GitHub Pages. O navegador usa serviços externos para pesquisa geográfica, rotas, envio de reclamações e navegação externa.
+### Pré-requisitos
 
-```mermaid
-flowchart LR
-    MozGIS[Servico MozGIS] -->|Camadas no build| Fetch[fetch-mozgis-data.js]
-    Fetch -->|Gera| GeoJSON[GeoJSON estatico]
-    Actions[GitHub Actions] -->|Executa build| Fetch
-    GeoJSON --> Pages[GitHub Pages]
-    Pages --> Browser[Navegador]
-    Browser --> Vue[Vue 3]
-    Vue --> Leaflet[Leaflet]
-    OSM[OpenStreetMap] --> Leaflet
-    Vue --> Nominatim[Pesquisa Nominatim]
-    Vue --> OSRM[Rotas OSRM FOSSGIS]
-    Vue --> EmailJS[EmailJS]
-    Vue --> GoogleMaps[Google Maps]
-```
+- Node.js 22 ou superior
+- npm
+- Conectividade à Internet para descarregar dependências e dados MozGIS
 
-## Tecnologias
-
-| Tecnologia | Utilização |
-|:--|:--|
-| Vue 3 | Componentes, estado reactivo e interface. |
-| Vite | Servidor de desenvolvimento, proxy MozGIS e build. |
-| `@vitejs/plugin-vue` | Integração dos componentes Vue com o Vite. |
-| Leaflet | Mapa interactivo, camadas e marcadores. |
-| `@emailjs/browser` | Envio de reclamações através do EmailJS. |
-| GitHub Actions e GitHub Pages | Build e publicação do site. |
-
-As versões npm estão declaradas em `package.json`. MozGIS, OpenStreetMap/Nominatim, OSRM/FOSSGIS e Google Maps são serviços externos, não dependências npm declaradas.
-
-## Organização do código
-
-```text
-.
-├── .github/workflows/deploy.yml    # Build e publicação no GitHub Pages
-├── scripts/
-│   └── fetch-mozgis-data.js        # Recolha e preparação dos dados MozGIS
-├── src/
-│   ├── components/                 # Pesquisa, mapa, lista, navegação e reclamações
-│   ├── composables/
-│   │   ├── useHospitals.js         # Carregamento e estado dos dados das unidades
-│   │   └── useGeolocation.js       # Pedido e acompanhamento da localização
-│   ├── services/
-│   │   ├── hospitalService.js      # Leitura e normalização das unidades
-│   │   ├── placeSearchService.js   # Pesquisa de locais via Nominatim
-│   │   └── routingService.js       # Cálculo de rotas via OSRM/FOSSGIS
-│   ├── utils/
-│   │   ├── distance.js             # Cálculo e apresentação de distâncias
-│   │   └── phone.js                # Conversão de contactos para ligações telefónicas
-│   ├── views/
-│   │   ├── HomeView.vue            # Página principal
-│   │   └── InfoView.vue            # Página Sobre
-│   ├── App.vue                     # Navegação por hash
-│   ├── main.js                     # Inicialização da aplicação
-│   └── style.css                   # Estilos
-├── .env.example                    # Nomes das variáveis EmailJS
-├── .gitignore
-├── index.html
-├── package-lock.json
-├── package.json
-└── vite.config.js                  # Base de publicação e proxy de desenvolvimento
-```
-
-`public/data/unidades.geojson` é gerado pelo build e não é versionado.
-
-## Execução local
-
-O workflow de publicação utiliza Node.js 22. O `package.json` não fixa uma versão de Node. Como o repositório inclui `package-lock.json`, instalamos as dependências com `npm ci`.
+### Execução local
 
 ```sh
 git clone https://github.com/jrdimande/hospital-finder.git
@@ -166,110 +134,151 @@ npm ci
 npm run dev
 ```
 
-Para criar e pré-visualizar a versão de produção:
+O servidor de desenvolvimento é iniciado pelo Vite, normalmente em `http://localhost:5173`.
+
+### Build de produção
 
 ```sh
 npm run build
 npm run preview
 ```
 
-Os comandos são iguais em Windows PowerShell, Linux e macOS. `npm run build` executa primeiro `npm run fetch:data` e depois `vite build`; por isso, o serviço MozGIS tem de estar acessível durante a recolha dos dados. Em desenvolvimento, o proxy do Vite encaminha `/api/mozgis` para `https://www.mozgis.gov.mz` e reescreve o caminho para `/server/rest/services`.
+O comando `npm run build` recolhe os dados MozGIS e gera a versão final em `dist/`. Para que o build seja concluído, o serviço MozGIS deve estar acessível.
 
 ## Configuração do EmailJS
 
-O formulário utiliza o SDK `@emailjs/browser` e requer estas variáveis:
-
-| Variável | Finalidade |
-|:--|:--|
-| `VITE_EMAILJS_SERVICE_ID` | Identifica o serviço EmailJS. |
-| `VITE_EMAILJS_TEMPLATE_ID` | Identifica o template de mensagem. |
-| `VITE_EMAILJS_PUBLIC_KEY` | Chave pública utilizada no navegador. |
-
-O ficheiro `.env.example` contém os nomes sem valores. Para desenvolvimento, copiamos esse ficheiro para `.env.local` e preenchemos os valores obtidos no painel EmailJS:
+O formulário de reclamações utiliza o SDK `@emailjs/browser`. Para activá-lo em ambiente local, crie o ficheiro `.env.local` a partir do exemplo existente:
 
 ```sh
 cp .env.example .env.local
 ```
 
-Os templates de mensagem são configurados no painel EmailJS. Recomendamos limitar os domínios autorizados ao GitHub Pages e aos domínios locais necessários. O formulário valida campos obrigatórios, formato de e-mail, tipo de problema e limites de 120 caracteres para o nome, 254 para o e-mail e 3000 para a descrição. Depois do envio, apresenta confirmação ou erro; sem as três variáveis, fica desactivado.
+Preencha as seguintes variáveis com os dados do painel EmailJS:
 
-> **Importante:** O formulário pede que não sejam incluídos dados clínicos na descrição da reclamação.
+```dotenv
+VITE_EMAILJS_SERVICE_ID=
+VITE_EMAILJS_TEMPLATE_ID=
+VITE_EMAILJS_PUBLIC_KEY=
+```
 
-O `.gitignore` ignora `.env.local`, mas não ignora um ficheiro chamado `.env`. Não guardamos valores de configuração num ficheiro `.env` que possa ser versionado. O workflow actual não mapeia secrets EmailJS para o passo de build. Para configurar o formulário no site publicado, seria necessário adicionar esse mapeamento ao workflow; guardar secrets nas definições do GitHub, por si só, não os disponibiliza ao build.
+| Variável | Função |
+|:--|:--|
+| `VITE_EMAILJS_SERVICE_ID` | Identifica o serviço configurado no EmailJS |
+| `VITE_EMAILJS_TEMPLATE_ID` | Identifica o modelo da mensagem |
+| `VITE_EMAILJS_PUBLIC_KEY` | Chave pública utilizada pelo SDK no navegador |
+
+Sem estas três variáveis, o formulário permanece indisponível.
+
+> [!WARNING]
+> Variáveis com o prefixo `VITE_` são incluídas no código publicado e não devem conter dados secretos.
+
+Recomenda-se configurar os domínios autorizados no EmailJS para permitir apenas os endereços necessários, como o domínio local de desenvolvimento e o GitHub Pages.
 
 ## Publicação
 
-O workflow `.github/workflows/deploy.yml` executa em pushes para `master` ou por início manual. Instala as dependências, executa `npm run build`, carrega a pasta `dist` e publica-a no GitHub Pages.
+A publicação é realizada pelo workflow `.github/workflows/deploy.yml`.
 
-Em `vite.config.js`, o `base` é definido como `/<nome-do-repositório>/` quando o build é executado pelo GitHub Actions com `GITHUB_REPOSITORY` disponível. Nos outros casos, o `base` é `/`. A navegação da aplicação usa hashes tratados manualmente; não há Vue Router nem modo de histórico HTML5.
+- O workflow é executado em pushes para o branch `master`.
+- Também pode ser iniciado manualmente em **Actions → CI/CD — GitHub Pages → Run workflow**.
+- As dependências são instaladas com `npm ci`.
+- Os dados são recolhidos e o projecto é compilado com `npm run build`.
+- O conteúdo de `dist/` é publicado no GitHub Pages.
 
-Para activar a publicação, seleccionamos **Settings → Pages → Build and deployment → Source → GitHub Actions**. O workflow também pode ser iniciado na página **Actions**.
+Para activar o GitHub Pages:
 
-O workflow está configurado para `master`, enquanto o remoto aponta `origin/HEAD` para `main`. Um push apenas para `main` não activa o workflow.
+1. Aceda a **Settings → Pages**.
+2. Em **Build and deployment**, seleccione **GitHub Actions** como origem.
+
+### Navegação e URL base
+
+A aplicação utiliza fragmentos da URL em vez do Vue Router. `vite.config.js` define o URL base como `/nome-do-repositório/` em builds executados pelo GitHub Actions e `/` nos restantes ambientes.
+
+O branch padrão configurado no repositório remoto pode diferir do branch que activa a publicação. O workflow actual observa `master`.
 
 ## Privacidade e limitações
 
-Pedimos a localização apenas após uma acção do utilizador e mantemo-la em memória no navegador; o código não a grava numa base de dados própria. Ao pedir uma rota, enviamos as coordenadas de origem e destino ao serviço externo OSRM/FOSSGIS. O link externo do Google Maps também pode incluir as coordenadas de origem. Aplicam-se as políticas dos serviços externos.
+- A localização do utilizador só é solicitada após uma ação explícita.
+- A localização é mantida em memória no navegador e não é armazenada pela aplicação.
+- Ao calcular uma rota, as coordenadas de origem e destino são enviadas ao OSRM/FOSSGIS.
+- As ligações para o Google Maps podem enviar dados de destino e localização.
+- Os dados apresentados pela interface podem estar incompletos ou desactualizados.
+- Horários de funcionamento, disponibilidade e serviços clínicos não são fornecidos.
+- O perfil de mota utiliza o perfil rodoviário de carro e pode não reflectir todas as restrições aplicáveis.
+- A aplicação não implementa triagem clínica, marcações, lotação em tempo real ou integração com sistemas de emergência.
 
-Os valores com prefixo `VITE_` são incorporados no frontend e não são segredos. No EmailJS usamos a Public Key prevista para o cliente. O código escapa caracteres HTML dos dados apresentados nos popups do mapa.
-
-| Limitação | Impacto |
-|:--|:--|
-| Dados MozGIS podem estar incompletos ou desactualizados. | A data de geração não confirma a actualidade no terreno. |
-| Horários e disponibilidade não são fornecidos. | O utilizador deve confirmar directamente com a unidade. |
-| O modo mota utiliza o perfil de carro. | O percurso pode não reflectir restrições específicas para motas. |
-| Pesquisa Nominatim pode devolver outros locais. | Resultados externos não são necessariamente unidades sanitárias. |
-| A aplicação depende de serviços externos. | Mapas, pesquisa, rotas e reclamações requerem Internet e disponibilidade dos respectivos serviços. |
-
-Não implementamos triagem clínica, marcações, lotação em tempo real, contas de utilizador, histórico de utilização nem integração com sistemas de emergência.
+Não devem ser incluídos dados clínicos ou pessoais sensíveis no formulário de reclamações.
 
 ## Testes
 
-O `package.json` não define um script `test` e não encontrámos testes automatizados no projecto. O workflow verifica se existe um script de testes e, no estado actual, ignora essa etapa. Podemos validar a compilação com:
+O projecto não possui actualmente um script `test` nem uma suite automatizada. O workflow verifica a sua existência e ignora esta etapa quando não está disponível.
 
-```sh
-npm run build
+Antes de uma entrega ou publicação, recomenda-se testar manualmente:
+
+- Pesquisa por unidade e por localidade.
+- Pedido e actualização da localização.
+- Cálculo de rotas a pé, de carro e de mota.
+- Ligações telefónicas.
+- Envio de reclamações com e sem configuração do EmailJS.
+- Estados de erro e ausência de resultados.
+- Navegação no GitHub Pages.
+
+## Estrutura do projecto
+
+```text
+.
+├── .github/workflows/deploy.yml
+├── scripts/
+│   └── fetch-mozgis-data.js
+├── src/
+│   ├── components/
+│   ├── composables/
+│   │   ├── useHospitals.js
+│   │   └── useGeolocation.js
+│   ├── services/
+│   │   ├── hospitalService.js
+│   │   ├── placeSearchService.js
+│   │   └── routingService.js
+│   ├── utils/
+│   │   ├── distance.js
+│   │   └── phone.js
+│   ├── views/
+│   │   ├── HomeView.vue
+│   │   └── InfoView.vue
+│   ├── App.vue
+│   ├── main.js
+│   └── style.css
+├── .env.example
+├── index.html
+├── package.json
+├── package-lock.json
+└── vite.config.js
 ```
 
-Antes da entrega, recomendamos testar manualmente a pesquisa, a permissão de localização, as rotas nos três modos, a ligação telefónica quando existe contacto, o formulário EmailJS e os estados de erro e ausência de resultados. Estes são passos recomendados, não testes que afirmamos já ter executado.
+## Equipa
 
-## Equipa e contexto académico
+Projecto desenvolvido no âmbito da unidade curricular **Programação Web II**, no Instituto Superior de Transportes e Comunicações (ISUTC), Turma LECC31, durante o 2.º semestre de 2026.
 
-Desenvolvemos o Saúde Perto no âmbito da unidade curricular Programação Web II, no Instituto Superior de Transportes e Comunicações (ISUTC), Turma LECC31, durante o 2.º semestre de 2026, sob orientação do docente Ivan Ruby.
+**Docente:** Ivan Ruby
 
-| Membro | N.º de estudante | Utilizador GitHub |
+| Membro | Número | GitHub |
 |:--|:--:|:--|
 | Timóteo Dimande Júnior | 7085 | [@jrdimande](https://github.com/jrdimande) |
 | Rhiven Amade | 8557 | [@rhivss](https://github.com/rhivss) |
 | Shelton Lewis Matiquite | 7988 | [@sheltonlewis0](https://github.com/sheltonlewis0) |
 | Edwin Banda | 8029 | [@edwinbanda](https://github.com/edwinbanda) |
 
-## Colaboração e ferramentas de IA
+O desenvolvimento foi organizado em branches e revisões por pull request. Foram utilizados GitHub Copilot e outras ferramentas de apoio à identificação de bugs e à implementação de funcionalidades.
 
-O histórico Git confirma os seguintes branches e pull requests integrados. A API consultada não apresentou reviews registadas para os pull requests.
+Todo o código e toda a documentação entregues foram compreendidos e validados pelos membros da equipa.
 
-| Branch | Pull request e alteração |
-|:--|:--|
-| `rhiven/reclamacoes-email` | [PR #1](https://github.com/jrdimande/hospital-finder/pull/1), formulário de reclamações com EmailJS. |
-| `rhiven/reclamacoes-email-v3` | [PR #2](https://github.com/jrdimande/hospital-finder/pull/2), integração das reclamações na versão actualizada. |
-| `Chamadas-telefónicas` | Branch remoto encontrado; o histórico inclui uma alteração de ligações telefónicas. |
+## Licenças e créditos
 
-O grupo descreve o seu processo de trabalho como desenvolvimento em branches próprios, revisão por outro membro e integração através de **Create a merge commit**. `main` e `master` têm referências diferentes no remoto. O `.env.example` contém apenas nomes de variáveis e não há um ficheiro `.env` versionado.
-
-| Ferramenta de IA | Utilização | Partes do projecto |
-|:--|:--|:--|
-| GitHub Copilot | Utilizámos o Copilot para ajudar a identificar e resolver bugs e apoiar algumas tarefas de programação. | Apoio geral à depuração e ao desenvolvimento; não discriminamos ficheiros ou secções específicas do código. |
-
-Compreendemos e assumimos responsabilidade por todo o código e texto entregues. As bibliotecas e os serviços externos utilizados estão identificados neste documento.
-
-## Créditos e licenças
-
-- **MozGIS:** fonte dos dados geográficos das unidades sanitárias. Consultar o geoportal para os termos de utilização aplicáveis.
-- **OpenStreetMap contributors:** dados cartográficos sob a Open Database Licence (ODbL); mantemos a atribuição apresentada no mapa.
+- **MozGIS:** fonte dos dados geográficos das unidades sanitárias.
+- **OpenStreetMap contributors:** dados cartográficos disponibilizados sob a Open Database Licence (ODbL).
 - **Nominatim:** serviço de pesquisa geográfica do OpenStreetMap.
-- **OSRM/FOSSGIS:** serviço externo de cálculo de rotas.
-- **Leaflet:** biblioteca de mapas, licença BSD-2-Clause.
-- **EmailJS Browser SDK:** SDK de e-mail, licença BSD-3-Clause.
-- **Vue, Vite e `@vitejs/plugin-vue`:** dependências licenciadas sob MIT.
+- **OSRM/FOSSGIS:** serviço de cálculo de rotas.
+- **Leaflet:** biblioteca BSD-2-Clause.
+- **EmailJS Browser SDK:** SDK licenciada sob BSD-3-Clause.
+- **Vue, Vite e @vitejs/plugin-vue:** licenças MIT.
 
-O repositório não contém um ficheiro `LICENSE` na raiz e não declara uma licença própria para o código do projecto.
+O repositório não contém actualmente um ficheiro `LICENSE` próprio. Antes de uma distribuição pública, a equipa deve definir explicitamente a licença do código e dos dados produzidos pelo projecto.
